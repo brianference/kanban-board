@@ -13,14 +13,19 @@ A Python-based kanban board system with cloud persistence via Supermemory.ai, ti
 ## Architecture
 
 ```
-tasks.json (local cache)
+tasks.json (source of truth + local storage)
     ↓
-KanbanManager (Python)
-    ↓
-Supermemory.ai (cloud storage)
+KanbanManager (Python) → Supermemory.ai (cloud backup)
     ↓
 HTML Generator → Cloudflare Pages
 ```
+
+**How it works:**
+- `tasks.json` is the source of truth (fast local reads)
+- Every task change is synced to Supermemory (cloud backup)
+- Git version control for tasks.json (restore point)
+- Supermemory v3 API supports POST (store) but not GET (search)
+- If tasks.json is lost, export from Supermemory web UI and restore
 
 ## Installation
 
@@ -123,21 +128,21 @@ response = bot.handle_command("status")
 # Send response via message tool
 ```
 
-## Supermemory Storage
+## Supermemory Backup
 
-Tasks are stored in Supermemory with these tags:
+Tasks are backed up to Supermemory with these tags:
 - `project-kanban` - All kanban tasks
 - `task` - Generic task tag
 - `col-{column}` - Column-specific (col-progress, col-done, etc.)
 - `priority-{level}` - Priority-specific
 - `task-{id}` - Unique task identifier
 
-Search tasks in Supermemory:
-```python
-from supermemory_client import SupermemoryClient
-sm = SupermemoryClient()
-results = sm.search("bug fix", tags=["project-kanban", "priority-high"])
-```
+**Note:** Supermemory v3 API only supports POST (store) operations. Search/retrieval must be done via:
+1. Local tasks.json (primary)
+2. Git history (version control)
+3. Supermemory web UI (manual export if needed)
+
+This is intentional - fast local reads, cloud backup for disaster recovery.
 
 ## Git Workflow
 
