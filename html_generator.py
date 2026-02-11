@@ -14,8 +14,8 @@ class HTMLGenerator:
     
     def generate(self, output_path='index.html'):
         """Generate static HTML file"""
-        # Read the original kanban HTML as template
-        with open('/root/.openclaw/workspace/kanban/index.html', 'r') as f:
+        # Read the current working index.html as template (not the old kanban folder)
+        with open('/root/.openclaw/workspace/python-kanban/index.html.backup', 'r') as f:
             template = f.read()
         
         # Convert tasks to JSON string
@@ -25,14 +25,24 @@ class HTMLGenerator:
         # Find the line "const cards =" and replace until the closing ]
         import re
         
-        # Pattern to match: const cards = [...];
-        pattern = r'const cards\s*=\s*\n\s*\[[\s\S]*?\];'
+        # Pattern to match: const cards = [...]; (within the initialization IIFE)
+        pattern = r'(// Import cards \(only if no existing data\)\s*\n\s*const cards\s*=\s*)\n\s*\[[\s\S]*?\];'
         
-        # Use a function to avoid regex escape issues
-        def replace_cards(match):
-            return f'const cards = \n  {tasks_json};'
+        # Build the replacement with cards array AND localStorage save logic
+        save_logic = '''
+  
+  // Save cards to localStorage
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(cards));
+  localStorage.setItem('kanban_initialized', 'true');
+  localStorage.setItem(VERSION_KEY, CURRENT_VERSION);
+  console.log(`✅ Imported ${cards.length} cards from embedded data`);
+})();'''
         
-        updated_html = re.sub(pattern, replace_cards, template)
+        # Use a callback function to avoid regex escape issues
+        def replace_with_cards(match):
+            return match.group(1) + '\n  ' + tasks_json + ';' + save_logic
+        
+        updated_html = re.sub(pattern, replace_with_cards, template, count=1)
         
         # Write generated HTML
         with open(output_path, 'w') as f:
