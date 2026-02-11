@@ -4616,6 +4616,11 @@ async function initBoard() {
     // Initialize board on page load (password removed)
     console.log('🔧 Initializing board on page load');
     await initBoard();
+    
+    // FIX: Ensure modal starts hidden on page load (Iteration 3 regression fix)
+    const modalOverlay = document.getElementById('modalOverlay');
+    modalOverlay.classList.remove('active');
+    modalOverlay.style.display = 'none';
   });
   
 
