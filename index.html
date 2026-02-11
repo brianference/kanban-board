@@ -418,10 +418,11 @@
     border: 1px solid rgba(14, 165, 233, 0.1);
     border-radius: 12px;
     padding: 1rem;
-    cursor: grab;
+    cursor: pointer;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     animation: cardIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    -webkit-tap-highlight-color: transparent;
   }
   
   .card:hover {
@@ -432,9 +433,8 @@
   }
   
   .card:active {
-    cursor: grabbing;
-    transform: scale(1.02);
-    box-shadow: 0 12px 32px rgba(14, 165, 233, 0.25);
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
   }
 
   /* Light mode card backgrounds */
@@ -778,12 +778,15 @@
 
   .mobile-tabs {
     display: none;
-    background: #000000;
-    border-bottom: 1px solid rgba(14, 165, 233, 0.2);
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid var(--glass-border);
     padding: 0;
     position: sticky;
     top: 0;
     z-index: 99;
+    transition: background 0.3s ease, border-color 0.3s ease;
   }
 
   .mobile-tabs-inner {
@@ -809,7 +812,7 @@
     border: none;
     border-bottom: 3px solid transparent;
     cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1247,12 +1250,24 @@
       align-items: flex-end; 
     }
 
+    @keyframes slideUpFromBottom {
+      from {
+        transform: translateY(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
     .modal {
       max-width: none;
       border-radius: var(--radius-xl) var(--radius-xl) 0 0;
       padding: 1.5rem 1.25rem 2.5rem;
       max-height: 90vh;
       overflow-y: auto;
+      animation: slideUpFromBottom 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .modal h2 { 
@@ -1562,13 +1577,18 @@
     position: fixed;
     top: 16px;
     right: 16px;
-    z-index: 9999;
+    z-index: 100;
+    width: 56px;
+    height: 56px;
     background: var(--surface-elevated);
     border-radius: var(--radius-full);
     padding: 12px;
     box-shadow: var(--shadow-lg);
     cursor: pointer;
-    transition: transform 0.2s ease;
+    transition: transform 0.2s ease, background 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   
   /* Desktop: Move hamburger to top left to avoid overlap with "New Card" */
@@ -1606,14 +1626,15 @@
   
   .nav-menu {
     position: fixed;
-    top: 70px;
+    top: 80px;
     right: 16px;
-    z-index: 9998;
+    z-index: 99;
     background: var(--surface-elevated);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-xl);
     padding: var(--space-md);
     min-width: 200px;
+    max-width: 280px;
     display: none;
   }
   
@@ -1637,7 +1658,8 @@
     display: flex;
     align-items: center;
     gap: var(--space-sm);
-    padding: var(--space-sm) var(--space-md);
+    min-height: 48px;
+    padding: var(--space-md);
     border-radius: var(--radius-sm);
     cursor: pointer;
     transition: background 0.2s ease;
@@ -1975,6 +1997,11 @@
 </div>
 
 <script>
+
+// Global constants
+const STORAGE_KEY = 'task board-board-data';
+const VERSION_KEY = 'kanban_data_version';
+const SYNC_URL = '/.netlify/functions/sync-tasks';
 
 // ONE-TIME INITIALIZATION: Import hardcoded cards to localStorage
 (function() {
@@ -3730,6 +3757,13 @@
     "storyNumber": "US-107"
   }
 ];
+  
+  // Save cards to localStorage
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(cards));
+  localStorage.setItem('kanban_initialized', 'true');
+  localStorage.setItem(VERSION_KEY, CURRENT_VERSION);
+  console.log(`✅ Imported ${cards.length} cards from embedded data`);
+})();
 let editingId = null;
 let draggedId = null;
 let activeFilter = null;
@@ -4023,16 +4057,41 @@ function createCardEl(c) {
     </div>
   `;
 
-  el.addEventListener('click', () => {
+  // Card click handler - open modal to view/edit
+  let touchStartTime = 0;
+  let isDragging = false;
+  
+  el.addEventListener('touchstart', (e) => {
+    touchStartTime = Date.now();
+    isDragging = false;
+  }, { passive: true });
+  
+  el.addEventListener('touchmove', () => {
+    isDragging = true;
+  }, { passive: true });
+  
+  el.addEventListener('touchend', (e) => {
+    const touchDuration = Date.now() - touchStartTime;
+    // Only open modal if it was a tap (not drag) and quick (<500ms)
+    if (!isDragging && touchDuration < 500) {
+      // Check if tap was on edit button
+      if (e.target.closest('.card-edit-btn')) {
+        return; // Let edit button handle it
+      }
+      console.log('Card tapped (mobile):', c.id);
+      openModal(c.id);
+    }
+  }, { passive: true });
+  
+  el.addEventListener('click', (e) => {
+    // Ignore if clicking edit button
+    if (e.target.closest('.card-edit-btn')) {
+      return;
+    }
     console.log('Card clicked (desktop):', c.id);
     openModal(c.id);
   });
-  el.addEventListener('touchend', (e) => {
-    console.log('Card touched (mobile):', c.id);
-    e.preventDefault(); // Prevent double-firing with click
-    e.stopPropagation(); // Stop event bubbling
-    openModal(c.id);
-  });
+  
   el.addEventListener('dragstart', onDragStart);
   el.addEventListener('dragend', onDragEnd);
   return el;
