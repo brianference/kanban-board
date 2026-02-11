@@ -4042,6 +4042,10 @@ function createCardEl(c) {
   el.dataset.id = c.id;
 
   const tagClass = getTagClass(c.tag);
+  
+  // HYBRID APPROACH: Add inline onclick for maximum reliability
+  el.setAttribute('onclick', `window.openCardModal(this.dataset.id, event)`);
+  
   el.innerHTML = `
     <button class="card-edit-btn" onclick="event.stopPropagation(); openModal('${c.id}')" aria-label="Edit">
       <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
@@ -4057,7 +4061,7 @@ function createCardEl(c) {
     </div>
   `;
 
-  // Card click handler - open modal to view/edit
+  // FALLBACK: Event delegation listeners (keep for browsers that block inline handlers)
   let touchStartTime = 0;
   let isDragging = false;
   
@@ -4078,8 +4082,8 @@ function createCardEl(c) {
       if (e.target.closest('.card-edit-btn')) {
         return; // Let edit button handle it
       }
-      console.log('Card tapped (mobile):', c.id);
-      openModal(c.id);
+      console.log('[FALLBACK] Card tapped (mobile):', c.id);
+      window.openCardModal(c.id, e);
     }
   }, { passive: true });
   
@@ -4088,8 +4092,8 @@ function createCardEl(c) {
     if (e.target.closest('.card-edit-btn')) {
       return;
     }
-    console.log('Card clicked (desktop):', c.id);
-    openModal(c.id);
+    console.log('[FALLBACK] Card clicked (desktop):', c.id);
+    window.openCardModal(c.id, e);
   });
   
   el.addEventListener('dragstart', onDragStart);
@@ -4316,48 +4320,136 @@ function getDragAfterElement(container, y) {
   return closest;
 }
 
-// Modal
-function openModal(id) {
-  console.log('🔓 openModal() called with id:', id);
-  editingId = id || null;
+// HYBRID APPROACH: Global window function with extensive logging
+window.openCardModal = function(cardId, event) {
+  console.log('[MODAL-DEBUG] === CARD CLICKED ===');
+  console.log('[MODAL-DEBUG] Card ID:', cardId);
+  console.log('[MODAL-DEBUG] Card ID type:', typeof cardId);
+  console.log('[MODAL-DEBUG] Event:', event);
+  console.log('[MODAL-DEBUG] Event type:', event?.type);
+  console.log('[MODAL-DEBUG] Event target:', event?.target);
+  console.log('[MODAL-DEBUG] Timestamp:', new Date().toISOString());
+  
+  // Stop propagation to prevent double-firing
+  if (event) {
+    event.stopPropagation();
+    event.preventDefault();
+  }
+  
+  // Check if clicking edit button - if so, exit early
+  if (event?.target?.closest('.card-edit-btn')) {
+    console.log('[MODAL-DEBUG] Edit button clicked - skipping modal');
+    return;
+  }
+  
+  // Find the modal element
   const modal = document.getElementById('modalOverlay');
-  const titleEl = document.getElementById('modalTitle');
+  console.log('[MODAL-DEBUG] Modal element:', modal);
+  console.log('[MODAL-DEBUG] Modal exists:', !!modal);
+  
+  if (!modal) {
+    console.error('[MODAL-ERROR] Modal overlay not found in DOM!');
+    alert('ERROR: Modal not found. Check console (F12).');
+    return;
+  }
+  
+  // Convert cardId to number for consistent comparison
+  const numericId = Number(cardId);
+  console.log('[MODAL-DEBUG] Converted ID:', numericId);
+  
+  // Find card data
+  console.log('[MODAL-DEBUG] Searching in cards array:', cards.length, 'cards');
+  console.log('[MODAL-DEBUG] Available card IDs:', cards.map(c => c.id));
+  
+  const card = cards.find(c => c.id == numericId); // Use == for flexible comparison
+  console.log('[MODAL-DEBUG] Card found:', !!card);
+  console.log('[MODAL-DEBUG] Card data:', card);
+  
+  if (!card) {
+    console.error('[MODAL-ERROR] Card data not found for ID:', numericId);
+    console.error('[MODAL-ERROR] Available cards:', cards.map(c => ({ id: c.id, title: c.title })));
+    alert(`ERROR: Card ID ${numericId} not found. Check console.`);
+    return;
+  }
+  
+  // Populate modal fields
+  console.log('[MODAL-DEBUG] Populating modal fields...');
+  
+  const titleInput = document.getElementById('cardTitleInput');
+  const descInput = document.getElementById('cardDescInput');
+  const priorityInput = document.getElementById('cardPriorityInput');
+  const tagInput = document.getElementById('cardTagInput');
+  const columnInput = document.getElementById('cardColumnInput');
+  const modalTitle = document.getElementById('modalTitle');
   const deleteBtn = document.getElementById('deleteBtn');
+  
+  console.log('[MODAL-DEBUG] Modal fields found:', {
+    titleInput: !!titleInput,
+    descInput: !!descInput,
+    priorityInput: !!priorityInput,
+    tagInput: !!tagInput,
+    columnInput: !!columnInput,
+    modalTitle: !!modalTitle,
+    deleteBtn: !!deleteBtn
+  });
+  
+  // Set values
+  titleInput.value = card.title || '';
+  descInput.value = card.description || card.desc || '';
+  priorityInput.value = card.priority || 'medium';
+  tagInput.value = card.tag || '';
+  columnInput.value = card.col || 'backlog';
+  modalTitle.textContent = card.storyNumber ? `Edit Card (${card.storyNumber})` : 'Edit Card';
+  deleteBtn.style.display = '';
+  
+  // Set editing ID for save function
+  editingId = numericId;
+  
+  console.log('[MODAL-DEBUG] Modal populated with:');
+  console.log('[MODAL-DEBUG]   Title:', titleInput.value);
+  console.log('[MODAL-DEBUG]   Description:', descInput.value);
+  console.log('[MODAL-DEBUG]   Priority:', priorityInput.value);
+  console.log('[MODAL-DEBUG]   editingId set to:', editingId);
+  
+  // Show modal - multiple methods for maximum reliability
+  console.log('[MODAL-DEBUG] Showing modal...');
+  
+  modal.classList.add('active');
+  modal.style.display = 'flex';
+  modal.style.visibility = 'visible';
+  modal.style.opacity = '1';
+  document.body.style.overflow = 'hidden'; // Prevent background scroll
+  
+  console.log('[MODAL-DEBUG] === MODAL SHOULD NOW BE VISIBLE ===');
+  console.log('[MODAL-DEBUG] Modal classList:', Array.from(modal.classList));
+  console.log('[MODAL-DEBUG] Modal style.display:', modal.style.display);
+  console.log('[MODAL-DEBUG] Modal style.visibility:', modal.style.visibility);
+  console.log('[MODAL-DEBUG] Modal style.opacity:', modal.style.opacity);
+  console.log('[MODAL-DEBUG] Body overflow:', document.body.style.overflow);
+  
+  // Focus title input after a brief delay
+  setTimeout(() => {
+    titleInput.focus();
+    console.log('[MODAL-DEBUG] Title input focused');
+  }, 100);
+};
 
+// Modal (legacy function - now delegates to window.openCardModal)
+function openModal(id) {
+  console.log('🔓 openModal() called with id:', id, '- delegating to window.openCardModal');
+  
   if (id) {
-    const card = cards.find(c => c.id === id);
-    console.log('📦 Card data:', card);
-    console.log('📝 Card.description:', card?.description);
-    console.log('📝 Card.desc:', card?.desc);
-    
-    if (!card) {
-      console.error('❌ Card not found for id:', id);
-      return;
-    }
-    
-    titleEl.textContent = card.storyNumber ? `Edit Card (${card.storyNumber})` : 'Edit Card';
-    document.getElementById('cardTitleInput').value = card.title;
-    
-    // CRITICAL: Set description with detailed logging
-    const descValue = card.description || card.desc || '';
-    console.log('📋 Description to set:', descValue);
-    console.log('📏 Description length:', descValue.length);
-    
-    const descTextarea = document.getElementById('cardDescInput');
-    console.log('🎯 Textarea element:', descTextarea);
-    console.log('🎯 Textarea ID:', descTextarea?.id);
-    
-    descTextarea.value = descValue;
-    
-    console.log('✅ Textarea value after set:', descTextarea.value);
-    console.log('✅ Textarea value length:', descTextarea.value.length);
-    
-    document.getElementById('cardPriorityInput').value = card.priority;
-    document.getElementById('cardTagInput').value = card.tag || '';
-    document.getElementById('cardColumnInput').value = card.col;
-    deleteBtn.style.display = '';
+    // Edit existing card
+    window.openCardModal(id, null);
   } else {
-    console.log('➕ Creating new card');
+    // Create new card
+    console.log('[MODAL-DEBUG] Creating new card');
+    editingId = null;
+    
+    const modal = document.getElementById('modalOverlay');
+    const titleEl = document.getElementById('modalTitle');
+    const deleteBtn = document.getElementById('deleteBtn');
+    
     titleEl.textContent = 'New Card';
     document.getElementById('cardTitleInput').value = '';
     document.getElementById('cardDescInput').value = '';
@@ -4365,10 +4457,15 @@ function openModal(id) {
     document.getElementById('cardTagInput').value = '';
     document.getElementById('cardColumnInput').value = 'backlog';
     deleteBtn.style.display = 'none';
+    
+    modal.classList.add('active');
+    modal.style.display = 'flex';
+    modal.style.visibility = 'visible';
+    modal.style.opacity = '1';
+    document.body.style.overflow = 'hidden';
+    
+    setTimeout(() => document.getElementById('cardTitleInput').focus(), 100);
   }
-
-  modal.classList.add('active');
-  setTimeout(() => document.getElementById('cardTitleInput').focus(), 100);
 }
 
 function closeModal() {
@@ -4621,6 +4718,20 @@ async function initBoard() {
     const modalOverlay = document.getElementById('modalOverlay');
     modalOverlay.classList.remove('active');
     modalOverlay.style.display = 'none';
+    
+    // HYBRID APPROACH: Event delegation fallback
+    console.log('[MODAL-DEBUG] Setting up event delegation fallback');
+    document.body.addEventListener('click', (e) => {
+      const card = e.target.closest('.card');
+      if (card && !e.target.closest('.card-edit-btn') && !e.target.closest('button')) {
+        const cardId = card.dataset.id;
+        if (cardId) {
+          console.log('[MODAL-DEBUG] Event delegation triggered for card:', cardId);
+          window.openCardModal(cardId, e);
+        }
+      }
+    });
+    console.log('[MODAL-DEBUG] Event delegation fallback installed');
   });
   
 
@@ -4678,22 +4789,7 @@ async function initBoard() {
   
 </script>
 
-<!-- Eruda Mobile Debugging Console -->
-<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-<script>
-  eruda.init();
-  console.log('🐛 Eruda debugging console loaded');
-  console.log('Task Board initialized:', new Date().toISOString());
-  
-  // Force Eruda to be visible and on top
-  setTimeout(() => {
-    const erudaEl = document.querySelector('.eruda-container, #eruda');
-    if (erudaEl) {
-      erudaEl.style.zIndex = '99999';
-      console.log('✅ Eruda z-index set to 99999');
-    }
-  }, 1000);
-</script>
+<!-- Eruda removed - production debugging leak (2026-02-10) -->
 
 </body>
 </html>
