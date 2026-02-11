@@ -1896,7 +1896,7 @@
     "id": 1770839228101,
     "title": "Secret Vault Dark Mode - Design Specs",
     "description": "Design dark mode color scheme, toggle button, CSS variables. Max 3 colors, WCAG 2.2 AA compliant. Output: DARK-MODE-DESIGN.md",
-    "col": "backlog",
+    "col": "progress",
     "priority": "high",
     "tags": [
       "design",
@@ -1912,7 +1912,7 @@
     "id": 1770839228102,
     "title": "Secret Vault Dark Mode - Implementation",
     "description": "Implement dark mode CSS, toggle button with localStorage persistence. Deploy to GitHub + Cloudflare Pages. Path: /root/.openclaw/workspace/projects/secret-vault/",
-    "col": "backlog",
+    "col": "progress",
     "priority": "high",
     "tags": [
       "coding",
@@ -1928,7 +1928,7 @@
     "id": 1770839228103,
     "title": "Secret Vault Dark Mode - Write Test Cases",
     "description": "Write 15+ Playwright test cases for dark mode toggle, persistence, styling, mobile responsiveness. Output: tests/dark-mode.spec.js",
-    "col": "backlog",
+    "col": "progress",
     "priority": "high",
     "tags": [
       "testing",
@@ -1944,7 +1944,7 @@
     "id": 1770839228104,
     "title": "Secret Vault Dark Mode - Testing",
     "description": "Run Playwright tests on 3 platforms (Desktop, iPhone 12, Pixel 5). Generate TEST-REPORT.md with \u226585% pass rate. Create bug tasks if needed.",
-    "col": "backlog",
+    "col": "progress",
     "priority": "high",
     "tags": [
       "testing",
@@ -1960,7 +1960,7 @@
     "id": 1770839228105,
     "title": "Secret Vault Dark Mode - Production Validation",
     "description": "Validate dark mode in production at https://secret-vault-9r3.pages.dev/. Check accessibility, performance, all screens. Create bug tasks for issues.",
-    "col": "backlog",
+    "col": "progress",
     "priority": "high",
     "tags": [
       "testing",
