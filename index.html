@@ -3931,15 +3931,83 @@ const SYNC_URL = '/.netlify/functions/sync-tasks';
     "estimatedHours": null,
     "actualHours": null,
     "dueDate": null
+  },
+  {
+    "id": 1770839228101,
+    "title": "Secret Vault Dark Mode - Design Specs",
+    "description": "Design dark mode color scheme, toggle button, CSS variables. Max 3 colors, WCAG 2.2 AA compliant. Output: DARK-MODE-DESIGN.md",
+    "col": "backlog",
+    "priority": "high",
+    "tags": [
+      "design",
+      "secret-vault",
+      "dark-mode"
+    ],
+    "agent": "Designer Agent",
+    "created": 1770839228101,
+    "order": 0
+  },
+  {
+    "id": 1770839228102,
+    "title": "Secret Vault Dark Mode - Implementation",
+    "description": "Implement dark mode CSS, toggle button with localStorage persistence. Deploy to GitHub + Cloudflare Pages. Path: /root/.openclaw/workspace/projects/secret-vault/",
+    "col": "backlog",
+    "priority": "high",
+    "tags": [
+      "coding",
+      "secret-vault",
+      "dark-mode"
+    ],
+    "agent": "Coder Agent",
+    "created": 1770839228102,
+    "order": 1
+  },
+  {
+    "id": 1770839228103,
+    "title": "Secret Vault Dark Mode - Write Test Cases",
+    "description": "Write 15+ Playwright test cases for dark mode toggle, persistence, styling, mobile responsiveness. Output: tests/dark-mode.spec.js",
+    "col": "backlog",
+    "priority": "high",
+    "tags": [
+      "testing",
+      "secret-vault",
+      "dark-mode"
+    ],
+    "agent": "Test Case Writer",
+    "created": 1770839228103,
+    "order": 2
+  },
+  {
+    "id": 1770839228104,
+    "title": "Secret Vault Dark Mode - Testing",
+    "description": "Run Playwright tests on 3 platforms (Desktop, iPhone 12, Pixel 5). Generate TEST-REPORT.md with \u226585% pass rate. Create bug tasks if needed.",
+    "col": "backlog",
+    "priority": "high",
+    "tags": [
+      "testing",
+      "secret-vault",
+      "dark-mode"
+    ],
+    "agent": "Test Agent (Tessa)",
+    "created": 1770839228104,
+    "order": 3
+  },
+  {
+    "id": 1770839228105,
+    "title": "Secret Vault Dark Mode - Production Validation",
+    "description": "Validate dark mode in production at https://secret-vault-9r3.pages.dev/. Check accessibility, performance, all screens. Create bug tasks for issues.",
+    "col": "backlog",
+    "priority": "high",
+    "tags": [
+      "testing",
+      "secret-vault",
+      "dark-mode"
+    ],
+    "agent": "Validator Agent",
+    "created": 1770839228105,
+    "order": 4
   }
 ];
-  
-  // Save cards to localStorage
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(cards));
-  localStorage.setItem('kanban_initialized', 'true');
-  localStorage.setItem(VERSION_KEY, CURRENT_VERSION);
-  console.log(`✅ Imported ${cards.length} cards from embedded data`);
-})();
   
   // Save cards to localStorage
   localStorage.setItem(STORAGE_KEY, JSON.stringify(cards));
