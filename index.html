@@ -1577,7 +1577,7 @@
     position: fixed;
     top: 16px;
     right: 16px;
-    z-index: 100;
+    z-index: 150; /* Above header (z-index: 100) - FIX BLOCKER #1 */
     width: 56px;
     height: 56px;
     background: var(--surface-elevated);
@@ -4177,10 +4177,48 @@ function setupDropZones() {
     const newCol = col.cloneNode(true);
     col.parentNode.replaceChild(newCol, col);
     
-    // Re-attach card event listeners after cloning
-    newCol.querySelectorAll('.card').forEach(card => {
-      card.addEventListener('dragstart', onDragStart);
-      card.addEventListener('dragend', onDragEnd);
+    // Re-attach ALL card event listeners after cloning - FIX BLOCKER #2
+    newCol.querySelectorAll('.card').forEach(cardEl => {
+      // Drag events
+      cardEl.addEventListener('dragstart', onDragStart);
+      cardEl.addEventListener('dragend', onDragEnd);
+      
+      // Click/tap events to open modal
+      // Convert ID to proper type (some are numbers, some are strings)
+      let cardId = cardEl.dataset.id;
+      // Try to parse as number if it looks numeric
+      if (/^\d+$/.test(cardId)) {
+        cardId = Number(cardId);
+      }
+      
+      // Mobile: touchend with tap detection
+      let touchStartTime = 0;
+      let isDragging = false;
+      
+      cardEl.addEventListener('touchstart', (e) => {
+        touchStartTime = Date.now();
+        isDragging = false;
+      }, { passive: true });
+      
+      cardEl.addEventListener('touchmove', () => {
+        isDragging = true;
+      }, { passive: true });
+      
+      cardEl.addEventListener('touchend', (e) => {
+        const touchDuration = Date.now() - touchStartTime;
+        if (!isDragging && touchDuration < 500) {
+          if (e.target.closest('.card-edit-btn')) return;
+          console.log('Card tapped (mobile):', cardId);
+          openModal(cardId);
+        }
+      }, { passive: true });
+      
+      // Desktop: click event
+      cardEl.addEventListener('click', (e) => {
+        if (e.target.closest('.card-edit-btn')) return;
+        console.log('Card clicked (desktop):', cardId);
+        openModal(cardId);
+      });
     });
     
     newCol.addEventListener('dragover', e => {
