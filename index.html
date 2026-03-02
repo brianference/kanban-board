@@ -4515,11 +4515,22 @@ function setupDropZones() {
       
       cardEl.addEventListener('touchstart', (e) => {
         touchStartTime = Date.now();
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
         isDragging = false;
       }, { passive: true });
       
-      cardEl.addEventListener('touchmove', () => {
-        isDragging = true;
+      cardEl.addEventListener('touchmove', (e) => {
+        const touchX = e.touches[0].clientX;
+        const touchY = e.touches[0].clientY;
+        const deltaX = Math.abs(touchX - touchStartX);
+        const deltaY = Math.abs(touchY - touchStartY);
+        const movement = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+        
+        // Only set isDragging if movement > 15px threshold
+        if (movement > 15) {
+          isDragging = true;
+        }
       }, { passive: true });
       
       cardEl.addEventListener('touchend', (e) => {
