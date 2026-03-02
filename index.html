@@ -301,6 +301,18 @@
     overflow: hidden;
   }
 
+  /* Light mode: Dark text on light background */
+  :root .column-header {
+    color: #1e293b;
+    background: #f1f5f9;
+  }
+
+  /* Dark mode: Light text on dark background */
+  [data-theme="dark"] .column-header {
+    color: #FAFAFA;
+    background: #1A1A1A;
+  }
+
   .column-header::before {
     content: '';
     position: absolute;
@@ -1735,6 +1747,14 @@
     }
   }
 </style>
+<!-- Eruda Mobile Debugging Console -->
+<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+<script>
+  // Initialize Eruda on mobile or when ?debug=true
+  if (window.innerWidth < 768 || window.location.search.includes('debug=true')) {
+    eruda.init();
+  }
+</script>
 </head>
 <body>
 <!-- Hamburger Menu -->
@@ -4342,15 +4362,28 @@ function createCardEl(c) {
 
   // FALLBACK: Event delegation listeners (keep for browsers that block inline handlers)
   let touchStartTime = 0;
-  let isDragging = false;
+      let touchStartX = 0;
+      let touchStartY = 0;
+      let isDragging = false;
   
   el.addEventListener('touchstart', (e) => {
     touchStartTime = Date.now();
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
     isDragging = false;
   }, { passive: true });
   
-  el.addEventListener('touchmove', () => {
-    isDragging = true;
+  el.addEventListener('touchmove', (e) => {
+    const touchX = e.touches[0].clientX;
+    const touchY = e.touches[0].clientY;
+    const deltaX = Math.abs(touchX - touchStartX);
+    const deltaY = Math.abs(touchY - touchStartY);
+    const movement = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    
+    // Only set isDragging if movement > 15px threshold
+    if (movement > 15) {
+      isDragging = true;
+    }
   }, { passive: true });
   
   el.addEventListener('touchend', (e) => {
@@ -4476,6 +4509,8 @@ function setupDropZones() {
       
       // Mobile: touchend with tap detection
       let touchStartTime = 0;
+      let touchStartX = 0;
+      let touchStartY = 0;
       let isDragging = false;
       
       cardEl.addEventListener('touchstart', (e) => {
