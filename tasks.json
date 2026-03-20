@@ -1524,7 +1524,7 @@
       "p0"
     ],
     "priority": "critical",
-    "status": "in-progress",
+    "status": "done",
     "createdAt": "2026-02-08T21:24:06.635Z",
     "assignee": "Coder Agent + Test Agent",
     "storyNumber": "US-096"
@@ -1971,5 +1971,193 @@
     "created": 1770839228105,
     "order": 4,
     "storyNumber": "US-112"
+  },
+  {
+    "id": 1771345788741,
+    "title": "AI Agent for Automated UX Test Case Generation",
+    "description": "**User Story:**\nAs a product team, we want an AI Agent that automatically generates comprehensive UX test cases (visual hierarchy, touch targets, info architecture, feedback & states, accessibility) based on design specifications, outputting them in a structured format for Test Agents.\n\n**Acceptance Criteria:**\n- Agent accepts design specs as input (markdown, Figma links, or component descriptions)\n- Generates test cases covering 5 UX categories: visual hierarchy, touch targets, info architecture, feedback & states, accessibility\n- Output is structured JSON/markdown consumable by Test Agents\n- Generates minimum 20 test cases per design spec\n- Each test case includes: description, steps, expected result, priority, category\n- Integrates with existing Designer Agent workflow\n- Achieves \u226585% coverage compared to manually written test cases\n- Reduces test case creation time by \u226560%",
+    "col": "backlog",
+    "priority": "high",
+    "tag": "ai-agent",
+    "tags": [
+      "ai-agent",
+      "ux-testing",
+      "automation",
+      "large-effort"
+    ],
+    "agent": "Cole | Design spec \u2192 UX test cases pipeline",
+    "created": 1771345788741,
+    "order": 0,
+    "storyNumber": "US-113"
+  },
+  {
+    "id": 1771527119283,
+    "storyNumber": "MC-001",
+    "title": "Mission Control: Agent Command Center",
+    "description": "**User Story:**\nAs Brian, I want to start, stop, and kill agents directly from Mission Control so I can manage my AI workforce without switching to the terminal or kanban board.\n\n**Acceptance Criteria:**\n- Show all active sessions (main + isolated) with kind, model, last active\n- Buttons: Kill, Steer, View Log per session\n- Spawn new agent from dropdown (select task from kanban)\n- Token burn rate displayed per agent\n- Refresh every 30 seconds\n- Screenshot proof required before marking complete",
+    "col": "done",
+    "priority": "critical",
+    "tag": "mission-control",
+    "tags": [
+      "mission-control",
+      "agents",
+      "infrastructure"
+    ],
+    "agent": "Coder Agent",
+    "created": 1771527119283,
+    "order": 1
+  },
+  {
+    "id": 1771527119284,
+    "storyNumber": "MC-002",
+    "title": "Mission Control: Cron Control Panel",
+    "description": "**User Story:**\nAs Brian, I want to see and manage all 27 cron jobs from Mission Control so I can enable/disable, trigger, and monitor cost per job without using the CLI.\n\n**Acceptance Criteria:**\n- List all cron jobs with name, schedule, last run, next run, status\n- Enable/Disable toggle per job\n- Run Now button per job\n- Show estimated cost per job (tokens * rate)\n- Filter by status (enabled/disabled/failed)\n- Screenshot proof required before marking complete",
+    "col": "done",
+    "priority": "critical",
+    "tag": "mission-control",
+    "tags": [
+      "mission-control",
+      "cron",
+      "infrastructure"
+    ],
+    "agent": "Coder Agent",
+    "created": 1771527119284,
+    "order": 2
+  },
+  {
+    "id": 1771527119285,
+    "storyNumber": "MC-003",
+    "title": "Mission Control: Real OpenClaw API Connection",
+    "description": "**User Story:**\nAs Brian, I want Mission Control to show real live data from the OpenClaw gateway so the dashboard is actually useful and not just mock theater.\n\n**Acceptance Criteria:**\n- Wire fetchSessions() to actual OpenClaw gateway API (localhost:3000 or gateway proxy)\n- Show real session count, message count, token count\n- Activity stream shows real events (not mock)\n- Graceful fallback if API unavailable (show last-known state + warning badge)\n- Auto-refresh every 30 seconds\n- All Commandment #32 mock-data violations resolved\n- Screenshot proof required before marking complete",
+    "col": "done",
+    "priority": "critical",
+    "tag": "mission-control",
+    "tags": [
+      "mission-control",
+      "api",
+      "real-data"
+    ],
+    "agent": "Coder Agent",
+    "created": 1771527119285,
+    "order": 3
+  },
+  {
+    "id": 1771527119286,
+    "storyNumber": "MC-004",
+    "title": "Mission Control: Cost / Token Burn Dashboard",
+    "description": "**User Story:**\nAs Brian, I want to see my daily token spend and cost by model in Mission Control so I can track burn rate and optimize AI costs.\n\n**Acceptance Criteria:**\n- Daily token spend chart (last 7 days)\n- Cost breakdown by model (anthropic, google, openrouter)\n- Current session burn rate (tokens/hour)\n- Budget alert threshold (configurable, default 0/day)\n- Show most expensive cron jobs\n- Data sourced from real gateway logs (not mock)\n- Screenshot proof required before marking complete",
+    "col": "done",
+    "priority": "high",
+    "tag": "mission-control",
+    "tags": [
+      "mission-control",
+      "cost",
+      "analytics"
+    ],
+    "agent": "Coder Agent",
+    "created": 1771527119286,
+    "order": 4
+  },
+  {
+    "id": 1771527119287,
+    "storyNumber": "MC-005",
+    "title": "Mission Control: Model Health Panel",
+    "description": "**User Story:**\nAs Brian, I want to see the live health status of all configured AI models so I know immediately when auth fails or rate limits hit without checking logs.\n\n**Acceptance Criteria:**\n- Show all configured models with auth status: OK / Missing Auth / Rate Limited / Error\n- Highlight fallback chain: gemini-flash \u2192 sonnet-4.5 \u2192 minimax-m2.1\n- Note: anthropic-opus46 Missing auth is a known false positive \u2014 mark as OK\n- Last checked timestamp per model\n- Manual re-check button\n- Alert badge on dashboard header when any model is unhealthy\n- Screenshot proof required before marking complete",
+    "col": "done",
+    "priority": "high",
+    "tag": "mission-control",
+    "tags": [
+      "mission-control",
+      "models",
+      "health"
+    ],
+    "agent": "Coder Agent",
+    "created": 1771527119287,
+    "order": 5
+  },
+  {
+    "id": 1771527119288,
+    "storyNumber": "MC-006",
+    "title": "Mission Control: Alert Center",
+    "description": "**User Story:**\nAs Brian, I want a unified alert feed in Mission Control so I can see cron failures, auth errors, intel alerts, and Telegram issues in one place instead of hunting through logs.\n\n**Acceptance Criteria:**\n- Unified alert feed with severity levels (critical/warning/info)\n- Sources: cron job failures, model auth errors, intel monitor hits, Telegram session errors\n- Dismiss individual alerts\n- Clear all button\n- Alert count badge on nav\n- Persist alerts across page refreshes (localStorage)\n- Screenshot proof required before marking complete",
+    "col": "done",
+    "priority": "high",
+    "tag": "mission-control",
+    "tags": [
+      "mission-control",
+      "alerts",
+      "monitoring"
+    ],
+    "agent": "Coder Agent",
+    "created": 1771527119288,
+    "order": 6
+  },
+  {
+    "id": 1771527119289,
+    "storyNumber": "MC-007",
+    "title": "Mission Control: Kanban Integration Widget",
+    "description": "**User Story:**\nAs Brian, I want to see my current sprint status in Mission Control so I can check active agents, blocked tasks, and quick wins without switching tabs.\n\n**Acceptance Criteria:**\n- Widget showing: active agent count, tasks in-progress, blocked count, next-up queue depth\n- Top 3 quick wins (estimated <3hrs) surfaced automatically\n- Click task to open kanban board at that task\n- Data pulled from kanban tasks.json (or deployed board API)\n- Refresh every 5 minutes\n- Screenshot proof required before marking complete",
+    "col": "done",
+    "priority": "high",
+    "tag": "mission-control",
+    "tags": [
+      "mission-control",
+      "kanban",
+      "integration"
+    ],
+    "agent": "Coder Agent",
+    "created": 1771527119289,
+    "order": 7
+  },
+  {
+    "id": 1771527119290,
+    "storyNumber": "MC-008",
+    "title": "Mission Control: Memory Health Panel",
+    "description": "**User Story:**\nAs Brian, I want to see memory system health in Mission Control so I know if mem0 and Supermemory are in sync and when the last backup ran.\n\n**Acceptance Criteria:**\n- Show mem0 vector count (via OpenClaw mem0 plugin)\n- Show Supermemory document count (via SUPERMEMORY_API_KEY)\n- Last backup timestamp for each\n- Sync drift alert if counts diverge >20%\n- Run backup now button (triggers update-supermemory.py)\n- Screenshot proof required before marking complete",
+    "col": "done",
+    "priority": "high",
+    "tag": "mission-control",
+    "tags": [
+      "mission-control",
+      "memory",
+      "health"
+    ],
+    "agent": "Coder Agent",
+    "created": 1771527119290,
+    "order": 8
+  },
+  {
+    "id": 1773980876509,
+    "title": "Upgrade tokyo-one to Vite 8.0 Build System",
+    "description": "**User Story:**\nAs a developer, I want to upgrade tokyo-one to Vite 8.0 so that we get faster development with HMR, tree-shaking for smaller bundles, and modern ES modules.\n\n**Context:**\nVite 8.0 released with babel-free React Refresh transforms (Oxc), significantly faster cold-start speed and smaller installation size.\n\n**Acceptance Criteria:**\n- Initialize Vite 8.0 in tokyo-one project\n- Migrate existing JS to src/ directory\n- Keep current deploy.sh pattern (Cloudflare Pages)\n- Test HMR functionality\n- Verify bundle size reduction\n- Maintain all current features (map, filters, search)\n- Screenshot proof of working dev server + production build\n\n**Benefits:**\n- Faster development with Hot Module Replacement\n- Tree-shaking for smaller bundle sizes\n- Modern ES modules with backward compatibility\n- Keeps current Cloudflare Pages deploy workflow\n\n**Effort:** 30-45 minutes | Impact: Medium | Risk: Low",
+    "col": "backlog",
+    "priority": "med",
+    "tag": "performance",
+    "tags": [
+      "tokyo-one",
+      "vite",
+      "build-optimization",
+      "performance"
+    ],
+    "agent": "Coder Agent",
+    "created": 1773980876509,
+    "order": 0
+  },
+  {
+    "id": 1773980876510,
+    "title": "Optimize Google Places API Calls by Field Selection",
+    "description": "**User Story:**\nAs a developer, I want to optimize Google Places API calls by requesting only specific data fields so that we reduce API costs by 40-60% and get faster response times.\n\n**Context:**\nGoogle Places API New pricing guide emphasizes requesting only specific data fields to reduce costs. Currently we request full place details.\n\n**Acceptance Criteria:**\n- Update places-lookup.py to use field masks\n- Request only: id, displayName, rating, userRatingCount, formattedAddress, location\n- Remove: photos, reviews, opening_hours (unless explicitly needed)\n- Test all current use cases still work (restaurant lookup, navigation)\n- Document the field selection pattern\n- Verify cost reduction in API usage dashboard\n\n**Benefits:**\n- Reduce API costs by 40-60%\n- Faster response times\n- Same quality results for primary use cases\n\n**File to edit:** /root/.openclaw/workspace/skills/places-lookup/scripts/places-lookup.py\n\n**Effort:** 15 minutes | Impact: High (cost reduction) | Risk: Very Low",
+    "col": "backlog",
+    "priority": "high",
+    "tag": "cost-optimization",
+    "tags": [
+      "places-api",
+      "cost-reduction",
+      "optimization",
+      "api"
+    ],
+    "agent": "Coder Agent",
+    "created": 1773980876510,
+    "order": 0
   }
 ]
