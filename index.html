@@ -51,6 +51,7 @@
     --gradient-end: #38bdf8;
     --surface: var(--neutral-900);
     --surface-card: var(--neutral-800);
+    --surface-elevated: #ffffff;
     --text-primary: var(--color-text-primary);
     --text-secondary: var(--color-text-secondary);
     --border: rgba(148, 163, 184, 0.2);
@@ -1594,6 +1595,7 @@
     width: 56px;
     height: 56px;
     background: var(--surface-elevated);
+    border: 1px solid var(--border);
     border-radius: var(--radius-full);
     padding: 12px;
     box-shadow: var(--shadow-lg);
@@ -1641,7 +1643,7 @@
     position: fixed;
     top: 80px;
     right: 16px;
-    z-index: 99;
+    z-index: 160; /* Above hamburger (150) and header (100) */
     background: var(--surface-elevated);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-xl);
