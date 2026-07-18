@@ -1,35 +1,39 @@
+/* Design A — Command Center · Cyber Cyan */
 :root {
-  --bg: #f4f7fb;
+  --bg: #f3fafd;
   --surface: #ffffff;
-  --surface-2: #eef2f7;
-  --border: #d5dde8;
-  --text: #0f172a;
-  --text-muted: #64748b;
-  --accent: #0ea5e9;
-  --accent-hover: #0284c7;
-  --danger: #dc2626;
-  --critical: #b91c1c;
+  --surface-2: #e8f4fa;
+  --border: #d7e6ef;
+  --text: #0b1c28;
+  --text-muted: #4b6474;
+  --accent: #0284c7;
+  --accent-hover: #0369a1;
+  --accent-on: #ffffff;
+  --danger: #ff4757;
+  --critical: #dc2626;
   --high: #ea580c;
   --medium: #ca8a04;
   --low: #16a34a;
-  --shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
-  --radius: 12px;
+  --shadow: 0 8px 24px rgba(7, 16, 24, 0.08);
+  --radius: 14px;
   --nav-h: 56px;
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --font-display: 'Space Grotesk', Inter, system-ui, sans-serif;
   color-scheme: light;
 }
 
 [data-theme='dark'] {
-  --bg: #0b1220;
-  --surface: #121a2b;
-  --surface-2: #1a2438;
-  --border: #2a364d;
-  --text: #e8eef9;
-  --text-muted: #94a3b8;
-  --accent: #38bdf8;
-  --accent-hover: #7dd3fc;
-  --danger: #f87171;
-  --shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  --bg: #071018;
+  --surface: #0f1b28;
+  --surface-2: #0a1520;
+  --border: #1a2c3d;
+  --text: #e8f7ff;
+  --text-muted: #8fb3c7;
+  --accent: #00c9ff;
+  --accent-hover: #5adfff;
+  --accent-on: #042018;
+  --danger: #ff4757;
+  --shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
   color-scheme: dark;
 }
 
@@ -52,6 +56,14 @@ body {
   line-height: 1.45;
   background: var(--bg);
   color: var(--text);
+}
+
+h1,
+h2,
+.topbar h1,
+.metric-tile b,
+.hero h1 {
+  font-family: var(--font-display);
 }
 
 a {
@@ -136,7 +148,7 @@ select {
 .btn-primary {
   background: var(--accent);
   border-color: var(--accent);
-  color: #fff;
+  color: var(--accent-on);
 }
 
 .btn-primary:hover {
@@ -212,6 +224,94 @@ select {
 .error-text {
   color: var(--danger);
   font-size: 0.92rem;
+}
+
+/* Command Center metrics + compact rows */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+@media (min-width: 640px) {
+  .metrics-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.metric-tile {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  box-shadow: var(--shadow);
+}
+
+.metric-tile b {
+  display: block;
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1.1;
+}
+
+.metric-tile span {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.project-list {
+  display: grid;
+  gap: 8px;
+}
+
+.project-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+}
+
+.project-row:hover {
+  border-color: var(--accent);
+}
+
+.project-row-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.project-row-main strong {
+  font-size: 0.98rem;
+  font-weight: 650;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.project-row-meta {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.project-row-side {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 .project-grid {
@@ -393,7 +493,7 @@ select {
 .mobile-tab.active {
   background: var(--accent);
   border-color: var(--accent);
-  color: #fff;
+  color: var(--accent-on);
 }
 
 .bottom-nav {
@@ -442,7 +542,7 @@ select {
   border-radius: 50%;
   border: 0;
   background: var(--accent);
-  color: #fff;
+  color: var(--accent-on);
   font-size: 1.6rem;
   box-shadow: var(--shadow);
   cursor: pointer;
@@ -538,11 +638,11 @@ select {
 
 .hero {
   display: grid;
-  gap: 20px;
+  gap: 18px;
   padding: 28px 20px;
   border-radius: 18px;
   background:
-    radial-gradient(circle at top right, color-mix(in srgb, var(--accent) 22%, transparent), transparent 50%),
+    radial-gradient(circle at top right, color-mix(in srgb, var(--accent) 28%, transparent), transparent 52%),
     var(--surface);
   border: 1px solid var(--border);
   box-shadow: var(--shadow);
@@ -550,20 +650,35 @@ select {
 
 .hero h1 {
   margin: 0;
-  font-size: clamp(1.7rem, 4vw, 2.4rem);
-  line-height: 1.15;
+  font-size: clamp(1.7rem, 4vw, 2.5rem);
+  line-height: 1.12;
+  letter-spacing: -0.02em;
 }
 
 .hero p {
   margin: 0;
   color: var(--text-muted);
   font-size: 1.05rem;
+  max-width: 36rem;
 }
 
 .hero-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+}
+
+.hero-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 4px;
+}
+
+@media (min-width: 640px) {
+  .hero-metrics {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }
 
 .feature-grid {
@@ -583,6 +698,7 @@ select {
 .feature h3 {
   margin: 0 0 6px;
   font-size: 1rem;
+  font-family: var(--font-display);
 }
 
 .template-grid {

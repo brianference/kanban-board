@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { TopBar } from '../components/layout/TopBar'
 
 /**
- * Marketing shell for strangers before signup.
+ * Marketing shell — Design A Command Center aesthetic.
  */
 export function LandingPage() {
   return (
@@ -22,22 +22,37 @@ export function LandingPage() {
             <Link className="btn" to="/login">
               Sign in
             </Link>
-            <a className="btn btn-ghost" href="/mockups/mobile-variations.html" target="_blank" rel="noreferrer">
-              View mobile mockups
-            </a>
+          </div>
+          <div className="hero-metrics" aria-hidden="true">
+            <div className="metric-tile">
+              <b>∞</b>
+              <span>Projects</span>
+            </div>
+            <div className="metric-tile">
+              <b>D1</b>
+              <span>Cloud save</span>
+            </div>
+            <div className="metric-tile">
+              <b>5</b>
+              <span>Board columns</span>
+            </div>
+            <div className="metric-tile">
+              <b>0</b>
+              <span>Setup fee</span>
+            </div>
           </div>
         </section>
         <div className="feature-grid">
           <article className="feature">
-            <h3>Your projects</h3>
-            <p className="muted">Many boards under one account. Switch in one tap.</p>
+            <h3>Command center home</h3>
+            <p className="muted">Metric tiles plus compact project rows — scan status in one glance.</p>
           </article>
           <article className="feature">
             <h3>Cloud save on D1</h3>
             <p className="muted">Tasks persist on Cloudflare D1 — not trapped in one browser.</p>
           </article>
           <article className="feature">
-            <h3>Mobile-first</h3>
+            <h3>Mobile-first board</h3>
             <p className="muted">Column tabs, thumb nav, and move-to-column without drag fights.</p>
           </article>
           <article className="feature">
