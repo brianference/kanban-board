@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Kanban Board — Mobile-first design variations</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=Inter:wght@400;600;700&family=Space+Grotesk:wght@500;700&display=swap');
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: Inter, system-ui, sans-serif;
+    background: #0b1020;
+    color: #e8eef9;
+    padding: 24px 16px 48px;
+  }
+  h1 { margin: 0 0 8px; font-size: 1.5rem; }
+  .sub { color: #94a3b8; margin-bottom: 24px; max-width: 720px; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 28px;
+    align-items: start;
+  }
+  .option h2 { margin: 0 0 4px; font-size: 1.05rem; }
+  .option .meta { color: #94a3b8; font-size: 0.85rem; margin-bottom: 12px; }
+  .swatches { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+  .swatch {
+    width: 22px; height: 22px; border-radius: 999px; border: 1px solid rgba(255,255,255,.2);
+  }
+  .phone-wrap { display: grid; gap: 16px; }
+  .label { font-size: 0.75rem; letter-spacing: .08em; text-transform: uppercase; color: #64748b; }
+  .phone {
+    width: 300px;
+    height: 620px;
+    border-radius: 28px;
+    border: 8px solid #1e293b;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 20px 50px rgba(0,0,0,.45);
+  }
+  .phone.light { background: var(--bg); color: var(--t1); }
+  .phone.dark { background: var(--bg); color: var(--t1); }
+
+  /* A — Command center tiles */
+  .a-d { --bg:#071018; --card:#0f1b28; --accent:#00c9ff; --danger:#ff4757; --t1:#e8f7ff; --t2:#8fb3c7; --nav:#0a1520; --sep:#1a2c3d; }
+  .a-l { --bg:#f3fafd; --card:#ffffff; --accent:#0284c7; --danger:#dc2626; --t1:#0b1c28; --t2:#4b6474; --nav:#ffffff; --sep:#d7e6ef; }
+  .la-head { padding: 14px 14px 8px; display:flex; justify-content:space-between; align-items:center; font-family: Space Grotesk, sans-serif; font-weight:700; }
+  .la-metrics { display:grid; grid-template-columns:1fr 1fr; gap:8px; padding:0 12px 10px; }
+  .la-tile { background:var(--card); border:1px solid var(--sep); border-radius:14px; padding:12px; }
+  .la-tile b { display:block; font-size:1.35rem; color:var(--accent); font-family: Space Grotesk, sans-serif; }
+  .la-tile span { font-size:.75rem; color:var(--t2); }
+  .la-list { padding:0 12px; display:grid; gap:8px; }
+  .la-row { background:var(--card); border:1px solid var(--sep); border-radius:12px; padding:10px 12px; display:flex; justify-content:space-between; gap:8px; font-size:.88rem; }
+  .la-nav { position:absolute; left:0; right:0; bottom:0; height:56px; background:var(--nav); border-top:1px solid var(--sep); display:grid; grid-template-columns:repeat(4,1fr); }
+  .la-nav div { display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:.65rem; color:var(--t2); gap:2px; }
+  .la-nav .on { color:var(--accent); font-weight:700; }
+
+  /* B — Timeline chronicle */
+  .b-d { --bg:#0c0a06; --card:#17130c; --accent:#c88b14; --danger:#c04040; --t1:#fff6e8; --t2:#b7a48a; --nav:#120e08; --sep:#2a2216; }
+  .b-l { --bg:#fffaf2; --card:#ffffff; --accent:#b45309; --danger:#b91c1c; --t1:#1c1408; --t2:#6b5b45; --nav:#ffffff; --sep:#eadfce; }
+  .lb-head { padding:16px 14px 8px; font-family: DM Sans, sans-serif; }
+  .lb-head h3 { margin:0; font-size:1.1rem; }
+  .lb-rail { position:relative; margin:8px 14px 70px 28px; }
+  .lb-rail::before { content:""; position:absolute; left:0; top:6px; bottom:6px; width:2px; background:var(--sep); }
+  .lb-node { position:relative; padding:0 0 16px 18px; }
+  .lb-node::before { content:""; position:absolute; left:-5px; top:8px; width:12px; height:12px; border-radius:50%; background:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent); }
+  .lb-card { background:var(--card); border:1px solid var(--sep); border-radius:14px; padding:12px; }
+  .lb-card small { color:var(--t2); }
+  .lb-pill { display:inline-block; margin-top:6px; font-size:.72rem; padding:3px 8px; border-radius:999px; background:color-mix(in srgb, var(--accent) 18%, transparent); color:var(--accent); font-weight:600; }
+  .lb-nav { position:absolute; left:0; right:0; bottom:0; height:56px; background:var(--nav); border-top:1px solid var(--sep); display:flex; justify-content:space-around; align-items:center; font-size:.72rem; color:var(--t2); font-family: DM Sans, sans-serif; }
+  .lb-fab { position:absolute; right:16px; bottom:72px; width:52px; height:52px; border-radius:50%; background:var(--accent); color:#111; display:flex; align-items:center; justify-content:center; font-size:1.5rem; font-weight:700; }
+
+  /* C — Hero card focus */
+  .c-d { --bg:#060d12; --card:#0c1a22; --accent:#00d4b4; --danger:#ff5a5a; --t1:#e7fffa; --t2:#86b3a8; --nav:#08141a; --sep:#16303a; }
+  .c-l { --bg:#f2fffc; --card:#ffffff; --accent:#0f766e; --danger:#dc2626; --t1:#06241f; --t2:#4d6e68; --nav:#ffffff; --sep:#cfe8e2; }
+  .lc-top { padding:14px; display:flex; justify-content:space-between; align-items:center; font-family: IBM Plex Sans, sans-serif; }
+  .lc-seg { display:flex; gap:6px; padding:0 14px 10px; overflow:auto; }
+  .lc-seg span { white-space:nowrap; padding:8px 12px; border-radius:999px; border:1px solid var(--sep); font-size:.78rem; color:var(--t2); }
+  .lc-seg .on { background:var(--accent); color:#04221c; border-color:var(--accent); font-weight:700; }
+  .lc-hero { margin:8px 14px; background:var(--card); border:1px solid var(--sep); border-radius:20px; min-height:340px; padding:18px; display:flex; flex-direction:column; gap:12px; box-shadow:0 12px 30px rgba(0,0,0,.18); }
+  .lc-hero h3 { margin:0; font-size:1.25rem; line-height:1.25; }
+  .lc-hero p { margin:0; color:var(--t2); flex:1; }
+  .lc-actions { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+  .lc-actions button { min-height:44px; border-radius:12px; border:1px solid var(--sep); background:transparent; color:var(--t1); font-weight:600; }
+  .lc-actions .primary { background:var(--accent); border-color:var(--accent); color:#04221c; }
+  .lc-dots { display:flex; justify-content:center; gap:6px; }
+  .lc-dots i { width:7px; height:7px; border-radius:50%; background:var(--sep); display:block; }
+  .lc-dots .on { background:var(--accent); }
+  .lc-nav { position:absolute; left:0; right:0; bottom:0; height:56px; border-top:1px solid var(--sep); background:var(--nav); display:grid; grid-template-columns:repeat(4,1fr); font-size:.68rem; color:var(--t2); }
+  .lc-nav div { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; }
+  .lc-nav .on { color:var(--accent); font-weight:700; }
+
+  .note { margin-top: 28px; color:#94a3b8; font-size:.9rem; max-width:900px; }
+  code { color:#7dd3fc; }
+</style>
+</head>
+<body>
+  <h1>Three mobile-first design variations</h1>
+  <p class="sub">
+    Structurally different layouts (not recolors of the same skeleton). Pick colors from one column and
+    layout from another if you want a mix. Implemented product uses a hybrid of A’s metrics density + C’s column tabs.
+  </p>
+
+  <div class="grid">
+    <!-- A -->
+    <section class="option">
+      <h2>A — Command Center</h2>
+      <div class="meta">Palette: Cyber Cyan · Layout: 2×2 metric tiles + compact task rows</div>
+      <div class="swatches">
+        <span class="swatch" style="background:#071018"></span>
+        <span class="swatch" style="background:#00c9ff"></span>
+        <span class="swatch" style="background:#ff4757"></span>
+        <span class="swatch" style="background:#f3fafd"></span>
+      </div>
+      <div class="phone-wrap">
+        <div>
+          <div class="label">Dark</div>
+          <div class="phone dark a-d">
+            <div class="la-head"><span>Projects</span><span style="color:var(--accent)">＋</span></div>
+            <div class="la-metrics">
+              <div class="la-tile"><b>12</b><span>Open tasks</span></div>
+              <div class="la-tile"><b>3</b><span>In progress</span></div>
+              <div class="la-tile"><b>2</b><span>Overdue</span></div>
+              <div class="la-tile"><b>4</b><span>Projects</span></div>
+            </div>
+            <div class="la-list">
+              <div class="la-row"><span>Ship landing page</span><span style="color:var(--accent)">High</span></div>
+              <div class="la-row"><span>User interview</span><span style="color:var(--t2)">Med</span></div>
+              <div class="la-row"><span>Fix mobile nav</span><span style="color:var(--danger)">Crit</span></div>
+            </div>
+            <div class="la-nav">
+              <div class="on">📁 Projects</div><div>📋 Board</div><div>＋ New</div><div>⚙️</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="label">Light</div>
+          <div class="phone light a-l">
+            <div class="la-head"><span>Projects</span><span style="color:var(--accent)">＋</span></div>
+            <div class="la-metrics">
+              <div class="la-tile"><b>12</b><span>Open tasks</span></div>
+              <div class="la-tile"><b>3</b><span>In progress</span></div>
+              <div class="la-tile"><b>2</b><span>Overdue</span></div>
+              <div class="la-tile"><b>4</b><span>Projects</span></div>
+            </div>
+            <div class="la-list">
+              <div class="la-row"><span>Ship landing page</span><span style="color:var(--accent)">High</span></div>
+              <div class="la-row"><span>User interview</span><span style="color:var(--t2)">Med</span></div>
+              <div class="la-row"><span>Fix mobile nav</span><span style="color:var(--danger)">Crit</span></div>
+            </div>
+            <div class="la-nav">
+              <div class="on">📁 Projects</div><div>📋 Board</div><div>＋ New</div><div>⚙️</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- B -->
+    <section class="option">
+      <h2>B — Timeline Chronicle</h2>
+      <div class="meta">Palette: Warm Amber · Layout: vertical rail + diamond-style status nodes</div>
+      <div class="swatches">
+        <span class="swatch" style="background:#0c0a06"></span>
+        <span class="swatch" style="background:#c88b14"></span>
+        <span class="swatch" style="background:#c04040"></span>
+        <span class="swatch" style="background:#fffaf2"></span>
+      </div>
+      <div class="phone-wrap">
+        <div>
+          <div class="label">Dark</div>
+          <div class="phone dark b-d">
+            <div class="lb-head">
+              <h3>Side project</h3>
+              <div style="color:var(--t2); font-size:.85rem;">Today · 3 moves</div>
+            </div>
+            <div class="lb-rail">
+              <div class="lb-node"><div class="lb-card"><strong>Define MVP</strong><br/><small>Moved to Next Up</small><div class="lb-pill">critical</div></div></div>
+              <div class="lb-node"><div class="lb-card"><strong>Landing page</strong><br/><small>Assigned to you</small><div class="lb-pill">high</div></div></div>
+              <div class="lb-node"><div class="lb-card"><strong>Talk to one user</strong><br/><small>Due Fri</small><div class="lb-pill">research</div></div></div>
+            </div>
+            <div class="lb-fab">＋</div>
+            <div class="lb-nav"><span>Home</span><span style="color:var(--accent); font-weight:700;">Timeline</span><span>Board</span><span>Me</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="label">Light</div>
+          <div class="phone light b-l">
+            <div class="lb-head">
+              <h3>Side project</h3>
+              <div style="color:var(--t2); font-size:.85rem;">Today · 3 moves</div>
+            </div>
+            <div class="lb-rail">
+              <div class="lb-node"><div class="lb-card"><strong>Define MVP</strong><br/><small>Moved to Next Up</small><div class="lb-pill">critical</div></div></div>
+              <div class="lb-node"><div class="lb-card"><strong>Landing page</strong><br/><small>Assigned to you</small><div class="lb-pill">high</div></div></div>
+              <div class="lb-node"><div class="lb-card"><strong>Talk to one user</strong><br/><small>Due Fri</small><div class="lb-pill">research</div></div></div>
+            </div>
+            <div class="lb-fab">＋</div>
+            <div class="lb-nav"><span>Home</span><span style="color:var(--accent); font-weight:700;">Timeline</span><span>Board</span><span>Me</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- C -->
+    <section class="option">
+      <h2>C — Hero Card Focus</h2>
+      <div class="meta">Palette: Teal Jewel · Layout: one full card + column pills + action bar</div>
+      <div class="swatches">
+        <span class="swatch" style="background:#060d12"></span>
+        <span class="swatch" style="background:#00d4b4"></span>
+        <span class="swatch" style="background:#ff5a5a"></span>
+        <span class="swatch" style="background:#f2fffc"></span>
+      </div>
+      <div class="phone-wrap">
+        <div>
+          <div class="label">Dark</div>
+          <div class="phone dark c-d">
+            <div class="lc-top"><strong>Weekly plan</strong><span style="color:var(--t2)">Filter</span></div>
+            <div class="lc-seg">
+              <span>Backlog</span><span class="on">Doing</span><span>Blocked</span><span>Done</span>
+            </div>
+            <div class="lc-hero">
+              <div class="lc-dots"><i class="on"></i><i></i><i></i></div>
+              <h3>Deep work block</h3>
+              <p>90 minutes without meetings. Protect the calendar and silence chat.</p>
+              <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                <span style="font-size:.75rem; padding:4px 8px; border-radius:999px; border:1px solid var(--sep);">medium</span>
+                <span style="font-size:.75rem; padding:4px 8px; border-radius:999px; border:1px solid var(--sep);">#focus</span>
+              </div>
+              <div class="lc-actions">
+                <button type="button">Skip</button>
+                <button type="button" class="primary">Open</button>
+                <button type="button">Next</button>
+              </div>
+            </div>
+            <div class="lc-nav">
+              <div>📁</div><div class="on">📋 Board</div><div>＋</div><div>⚙️</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="label">Light</div>
+          <div class="phone light c-l">
+            <div class="lc-top"><strong>Weekly plan</strong><span style="color:var(--t2)">Filter</span></div>
+            <div class="lc-seg">
+              <span>Backlog</span><span class="on">Doing</span><span>Blocked</span><span>Done</span>
+            </div>
+            <div class="lc-hero">
+              <div class="lc-dots"><i class="on"></i><i></i><i></i></div>
+              <h3>Deep work block</h3>
+              <p>90 minutes without meetings. Protect the calendar and silence chat.</p>
+              <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                <span style="font-size:.75rem; padding:4px 8px; border-radius:999px; border:1px solid var(--sep);">medium</span>
+                <span style="font-size:.75rem; padding:4px 8px; border-radius:999px; border:1px solid var(--sep);">#focus</span>
+              </div>
+              <div class="lc-actions">
+                <button type="button">Skip</button>
+                <button type="button" class="primary">Open</button>
+                <button type="button">Next</button>
+              </div>
+            </div>
+            <div class="lc-nav">
+              <div>📁</div><div class="on">📋 Board</div><div>＋</div><div>⚙️</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <p class="note">
+    Product implementation ships a production UI inspired by <strong>A + C</strong>: project home metrics/list,
+    board with column pill tabs, bottom nav, and FAB. Full mockup file: <code>mockups/mobile-variations.html</code>.
+  </p>
+</body>
+</html>

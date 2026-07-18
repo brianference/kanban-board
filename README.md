@@ -1,190 +1,55 @@
-# Python Kanban Board with Supermemory Storage
+# Kanban Board (multi-user platform)
 
-A Python-based kanban board system with cloud persistence via Supermemory.ai, time tracking, and Telegram integration.
+Cloud-backed project tracker: **accounts, projects, boards, tasks** on **Cloudflare D1**.
 
-## Features
+- Live: https://kanban-board-public.pages.dev  
+- Source: https://github.com/brianference/kanban-board  
+- Mobile mockups: `/mockups/mobile-variations.html`
 
-✅ **Cloud Storage**: Tasks stored in Supermemory (no more data loss!)
-✅ **Time Tracking**: Auto-track start/end times, calculate actual hours
-✅ **Telegram Integration**: Quick commands for task management
-✅ **Static HTML Generation**: Deployable to Cloudflare Pages
-✅ **Git-backed**: Version control without exposing secrets
+## Stack
+
+- React + TypeScript + Vite (modular UI, not a monolith)
+- Cloudflare Pages Functions API
+- D1 (SQLite) with versioned migrations
+- Email + password auth (PBKDF2), httpOnly sessions
+
+## Local dev
+
+```bash
+npm install
+npm run build
+npx wrangler d1 migrations apply kanban-board-db --local
+npx wrangler pages dev dist --d1=DB=kanban-board-db
+```
+
+## Scripts
+
+| Command | Purpose |
+|---------|---------|
+| `npm run build` | Typecheck + production bundle |
+| `npm run test:unit` | Unit tests |
+| `npm run test:security` | Security / tenancy tests |
+| `npm run test:api` | API contract tests |
+| `npm run test:integration` | Multi-step flows |
+| `npm run test:sim` | 20 journey simulations |
+| `npm run test:pass1` | Full automated pass |
 
 ## Architecture
 
 ```
-tasks.json (source of truth + local storage)
-    ↓
-KanbanManager (Python) → Supermemory.ai (cloud backup)
-    ↓
-HTML Generator → Cloudflare Pages
+src/                 UI routes & components
+functions/api/       HTTP handlers
+functions/_lib/      auth, crypto, tenancy, templates
+migrations/          D1 schema
+mockups/             3 mobile-first design variations
+legacy/              Previous single-file board (archive)
 ```
 
-**How it works:**
-- `tasks.json` is the source of truth (fast local reads)
-- Every task change is synced to Supermemory (cloud backup)
-- Git version control for tasks.json (restore point)
-- Supermemory v3 API supports POST (store) but not GET (search)
-- If tasks.json is lost, export from Supermemory web UI and restore
+## Auth
 
-## Installation
+1. `POST /api/auth/register` `{ email, password, name }`  
+2. `POST /api/auth/login` `{ email, password }`  
+3. Cookie `kb_session` (HttpOnly)  
+4. `GET /api/auth/session`
 
-```bash
-cd /root/.openclaw/workspace/python-kanban
-pip install requests  # Only dependency
-```
-
-## Usage
-
-### Command Line
-
-```bash
-# Show board status
-./kanban.py status
-
-# Add task
-./kanban.py add "Fix login bug" --priority high --tags bug security
-
-# Move task
-./kanban.py move 1234567890 progress
-
-# List tasks
-./kanban.py list --column progress --priority critical
-
-# Generate HTML
-./kanban.py generate
-
-# Migrate to Supermemory (one-time)
-./kanban.py migrate
-```
-
-### Telegram Bot Simulation
-
-```bash
-# Status overview
-./kanban.py telegram status
-
-# Show in-progress tasks
-./kanban.py telegram progress
-
-# Add task
-./kanban.py telegram add "New task title"
-
-# Move task
-./kanban.py telegram move TASK-019 done
-
-# Show overdue
-./kanban.py telegram overdue
-```
-
-### Deployment
-
-```bash
-# Generate HTML + deploy to Cloudflare Pages
-./deploy.sh
-```
-
-## Task Structure
-
-```json
-{
-  "id": 1770521031234,
-  "title": "Task title",
-  "description": "Full description...",
-  "col": "progress",
-  "priority": "high",
-  "tags": ["feature", "v2"],
-  "created": 1770520938235,
-  "order": 0,
-  
-  // Time tracking (NEW)
-  "startTime": "2026-02-10T12:00:00Z",
-  "endTime": null,
-  "estimatedHours": 4,
-  "actualHours": null,
-  "dueDate": "2026-02-15"
-}
-```
-
-## Time Tracking
-
-- **startTime**: Auto-set when task moved to "progress"
-- **endTime**: Auto-set when task moved to "done"
-- **actualHours**: Auto-calculated from start/end times
-- **estimatedHours**: Manual entry (optional)
-- **dueDate**: Manual entry for deadline tracking
-
-## Telegram Commands (via OpenClaw)
-
-Integration with OpenClaw message tool:
-
-```python
-# In OpenClaw, you can call:
-from python_kanban import TelegramKanbanBot, KanbanManager
-
-kanban = KanbanManager()
-bot = TelegramKanbanBot(kanban, "https://kanban-board-264.pages.dev")
-response = bot.handle_command("status")
-# Send response via message tool
-```
-
-## Supermemory Backup
-
-Tasks are backed up to Supermemory with these tags:
-- `project-kanban` - All kanban tasks
-- `task` - Generic task tag
-- `col-{column}` - Column-specific (col-progress, col-done, etc.)
-- `priority-{level}` - Priority-specific
-- `task-{id}` - Unique task identifier
-
-**Note:** Supermemory v3 API only supports POST (store) operations. Search/retrieval must be done via:
-1. Local tasks.json (primary)
-2. Git history (version control)
-3. Supermemory web UI (manual export if needed)
-
-This is intentional - fast local reads, cloud backup for disaster recovery.
-
-## Git Workflow
-
-1. Edit tasks via CLI or Telegram
-2. Run `./deploy.sh`:
-   - Generates HTML
-   - Commits to git (tasks.json + index.html)
-   - Pushes to GitHub
-   - Triggers Cloudflare deployment
-3. Board updates automatically
-
-## Security
-
-✅ API keys loaded from `/root/.openclaw/secrets/keys.env`
-✅ Never committed to git
-✅ .gitignore enforced
-✅ Cloudflare deployment via API token (not exposed)
-
-## Troubleshooting
-
-**"SUPERMEMORY_API_KEY not found"**
-- Add key to `/root/.openclaw/secrets/keys.env`
-- Format: `SUPERMEMORY_API_KEY=your_key_here`
-
-**"git push failed"**
-- Initialize git repo: `git init && git remote add origin <url>`
-
-**"Cloudflare deployment failed"**
-- Check `CloudflarePagesDeployment` token in keys.env
-- Verify account ID and project name in deploy.sh
-
-## Migration from Old Kanban
-
-The old kanban board (pure HTML/JS) had 107 tasks. Migration process:
-
-1. Extract tasks: `cp /root/.openclaw/workspace/kanban/cards-updated.json tasks.json`
-2. Migrate to Supermemory: `./kanban.py migrate`
-3. Generate new HTML: `./kanban.py generate`
-4. Deploy: `./deploy.sh`
-
-## Live Board
-
-🔗 https://kanban-board-264.pages.dev
-
-Updated automatically on every deployment.
+No email provider required for v1.
