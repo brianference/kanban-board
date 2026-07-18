@@ -1,20 +1,14 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type DragEvent,
-  type ReactNode,
-} from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent } from 'react'
 import type { BoardPayload, ProjectMember, Task } from '../../types/models'
-import { DropPlaceholder, TaskCard } from './TaskCard'
+import { TaskCard } from './TaskCard'
 import { TaskModal, emptyTaskForm, taskToForm, type TaskFormState } from './TaskModal'
 import { api } from '../../lib/api'
 import { useToast } from '../../hooks/useToast'
 
 /**
- * Kanban board with animated drag-and-drop between columns.
+ * Kanban board — reliable HTML5 DnD + cloud auto-save on every move.
+ *
+ * Important: avoid setState on every dragover (re-renders cancel native drag).
  */
 export function BoardView({
   data,
@@ -35,15 +29,17 @@ export function BoardView({
     emptyTaskForm(data.columns[0]?.id || ''),
   )
 
-  /** Optimistic task list for instant drag feedback. */
   const [tasks, setTasks] = useState<Task[]>(data.tasks)
   const [dragTaskId, setDragTaskId] = useState<string | null>(null)
+  /** Highlight only — updated sparingly when column changes, not every pixel. */
   const [overColumnId, setOverColumnId] = useState<string | null>(null)
-  const [overIndex, setOverIndex] = useState<number | null>(null)
   const [settlingId, setSettlingId] = useState<string | null>(null)
-  const [moving, setMoving] = useState(false)
-  const dragImageRef = useRef<HTMLElement | null>(null)
+  const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+
+  const overColumnRef = useRef<string | null>(null)
+  const dragTaskRef = useRef<string | null>(null)
   const settleTimer = useRef<number | null>(null)
+  const savedTimer = useRef<number | null>(null)
 
   useEffect(() => {
     setTasks(data.tasks)
@@ -52,10 +48,7 @@ export function BoardView({
   useEffect(() => {
     return () => {
       if (settleTimer.current) window.clearTimeout(settleTimer.current)
-      if (dragImageRef.current) {
-        dragImageRef.current.remove()
-        dragImageRef.current = null
-      }
+      if (savedTimer.current) window.clearTimeout(savedTimer.current)
     }
   }, [])
 
@@ -93,51 +86,59 @@ export function BoardView({
       .map((t) => t.trim())
       .filter(Boolean)
 
-    if (editing) {
-      await api.updateTask(editing.id, {
-        title: form.title,
-        description: form.description,
-        priority: form.priority,
-        columnId: form.columnId,
-        dueAt,
-        assigneeId: form.assigneeId || null,
-        tags,
-      })
-      push('Task updated', 'success')
-    } else {
-      await api.createTask({
-        boardId: data.board.id,
-        columnId: form.columnId,
-        title: form.title,
-        description: form.description,
-        priority: form.priority,
-        dueAt,
-        assigneeId: form.assigneeId || null,
-        tags,
-      })
-      push('Task created', 'success')
+    setSaveState('saving')
+    try {
+      if (editing) {
+        await api.updateTask(editing.id, {
+          title: form.title,
+          description: form.description,
+          priority: form.priority,
+          columnId: form.columnId,
+          dueAt,
+          assigneeId: form.assigneeId || null,
+          tags,
+        })
+        push('Task saved to cloud', 'success')
+      } else {
+        await api.createTask({
+          boardId: data.board.id,
+          columnId: form.columnId,
+          title: form.title,
+          description: form.description,
+          priority: form.priority,
+          dueAt,
+          assigneeId: form.assigneeId || null,
+          tags,
+        })
+        push('Task created and saved', 'success')
+      }
+      setSaveState('saved')
+      if (savedTimer.current) window.clearTimeout(savedTimer.current)
+      savedTimer.current = window.setTimeout(() => setSaveState('idle'), 2500)
+      await onReload()
+    } catch (err) {
+      setSaveState('error')
+      push(err instanceof Error ? err.message : 'Save failed', 'error')
     }
-    await onReload()
   }
 
   async function deleteTask() {
     if (!editing) return
-    await api.deleteTask(editing.id)
-    push('Task deleted', 'success')
-    setModalOpen(false)
-    await onReload()
-  }
-
-  async function moveToColumn(columnId: string) {
-    if (!editing) return
-    const list = tasksByColumn.get(columnId) || []
-    const position = list.length ? list[list.length - 1]!.position + 1 : 0
-    await commitMove(editing.id, columnId, position)
-    setModalOpen(false)
+    setSaveState('saving')
+    try {
+      await api.deleteTask(editing.id)
+      push('Task deleted', 'success')
+      setModalOpen(false)
+      setSaveState('saved')
+      await onReload()
+    } catch (err) {
+      setSaveState('error')
+      push(err instanceof Error ? err.message : 'Delete failed', 'error')
+    }
   }
 
   /**
-   * Optimistically reorder then persist.
+   * Optimistic local move + persist to D1. This is how the board is "saved".
    */
   async function commitMove(taskId: string, columnId: string, position: number) {
     const prev = tasks
@@ -150,171 +151,133 @@ export function BoardView({
     if (settleTimer.current) window.clearTimeout(settleTimer.current)
     settleTimer.current = window.setTimeout(() => setSettlingId(null), 420)
 
-    setMoving(true)
+    setSaveState('saving')
     try {
       await api.moveTask(taskId, columnId, position)
-      await onReload()
+      setSaveState('saved')
+      push('Board saved', 'success')
+      if (savedTimer.current) window.clearTimeout(savedTimer.current)
+      savedTimer.current = window.setTimeout(() => setSaveState('idle'), 2500)
+      // Soft reload without blocking UI if possible
+      void onReload()
     } catch (err) {
       setTasks(prev)
-      push(err instanceof Error ? err.message : 'Move failed', 'error')
+      setSaveState('error')
+      push(err instanceof Error ? err.message : 'Move failed — not saved', 'error')
     } finally {
-      setMoving(false)
+      dragTaskRef.current = null
+      overColumnRef.current = null
       setDragTaskId(null)
       setOverColumnId(null)
-      setOverIndex(null)
     }
   }
 
-  function clearDragChrome() {
-    setDragTaskId(null)
-    setOverColumnId(null)
-    setOverIndex(null)
-    if (dragImageRef.current) {
-      dragImageRef.current.remove()
-      dragImageRef.current = null
-    }
+  async function moveToColumn(columnId: string) {
+    if (!editing) return
+    const list = (tasksByColumn.get(columnId) || []).filter((t) => t.id !== editing.id)
+    const position = list.length ? list[list.length - 1]!.position + 1 : 0
+    setModalOpen(false)
+    await commitMove(editing.id, columnId, position)
   }
 
   function onDragStart(task: Task, e: DragEvent) {
-    if (!canWrite || moving) return
+    if (!canWrite) {
+      e.preventDefault()
+      return
+    }
+    dragTaskRef.current = task.id
+    overColumnRef.current = task.columnId
     setDragTaskId(task.id)
+    setOverColumnId(task.columnId)
+
     e.dataTransfer.setData('text/plain', task.id)
+    e.dataTransfer.setData('application/x-task-id', task.id)
     e.dataTransfer.effectAllowed = 'move'
 
-    // Lifted ghost preview
-    const source = e.currentTarget as HTMLElement
-    const ghost = source.cloneNode(true) as HTMLElement
-    ghost.classList.add('task-card--ghost')
-    ghost.style.position = 'absolute'
-    ghost.style.top = '-1000px'
-    ghost.style.left = '-1000px'
-    ghost.style.width = `${source.offsetWidth}px`
-    ghost.style.pointerEvents = 'none'
-    document.body.appendChild(ghost)
-    dragImageRef.current = ghost
-    e.dataTransfer.setDragImage(ghost, source.offsetWidth / 2, 24)
+    // Prefer native drag image (reliable). Optional slight offset.
+    const el = e.currentTarget as HTMLElement
+    try {
+      e.dataTransfer.setDragImage(el, Math.min(40, el.offsetWidth / 4), 20)
+    } catch {
+      /* some browsers ignore setDragImage */
+    }
   }
 
   function onDragEnd() {
-    if (!moving) clearDragChrome()
+    // Drop may already have cleared; if cancelled, reset chrome only
+    if (dragTaskRef.current) {
+      dragTaskRef.current = null
+      overColumnRef.current = null
+      setDragTaskId(null)
+      setOverColumnId(null)
+    }
   }
 
   function onDragOverColumn(columnId: string, e: DragEvent) {
+    // Required for drop to fire
     e.preventDefault()
     e.dataTransfer.dropEffect = 'move'
-    if (!canWrite || !dragTaskId) return
-    setOverColumnId(columnId)
+    if (!canWrite || !dragTaskRef.current) return
 
-    const body = e.currentTarget.querySelector('.column-body') as HTMLElement | null
-    if (!body) {
-      setOverIndex(null)
-      return
+    // Only re-render when the target column actually changes (prevents drag cancel)
+    if (overColumnRef.current !== columnId) {
+      overColumnRef.current = columnId
+      setOverColumnId(columnId)
     }
-
-    const cards = [...body.querySelectorAll<HTMLElement>('.task-card:not(.task-card--dragging)')]
-    const y = e.clientY
-    let index = cards.length
-    for (let i = 0; i < cards.length; i++) {
-      const rect = cards[i]!.getBoundingClientRect()
-      const mid = rect.top + rect.height / 2
-      if (y < mid) {
-        index = i
-        break
-      }
-    }
-    setOverIndex(index)
   }
 
-  function onDragLeaveColumn(e: DragEvent) {
-    // Only clear when leaving the column entirely
-    const related = e.relatedTarget as Node | null
-    if (related && e.currentTarget.contains(related)) return
-    setOverColumnId((id) => (id === (e.currentTarget as HTMLElement).dataset.colId ? null : id))
+  function onDragEnterColumn(columnId: string, e: DragEvent) {
+    e.preventDefault()
+    if (!canWrite || !dragTaskRef.current) return
+    if (overColumnRef.current !== columnId) {
+      overColumnRef.current = columnId
+      setOverColumnId(columnId)
+    }
   }
 
   async function onDropColumn(columnId: string, e: DragEvent) {
     e.preventDefault()
+    e.stopPropagation()
     if (!canWrite) return
-    const taskId = e.dataTransfer.getData('text/plain') || dragTaskId
+
+    const taskId =
+      e.dataTransfer.getData('application/x-task-id') ||
+      e.dataTransfer.getData('text/plain') ||
+      dragTaskRef.current
     if (!taskId) {
-      clearDragChrome()
+      setDragTaskId(null)
+      setOverColumnId(null)
       return
     }
 
     const columnTasks = (tasksByColumn.get(columnId) || []).filter((t) => t.id !== taskId)
-    const insertAt = overColumnId === columnId && overIndex != null ? overIndex : columnTasks.length
+    const position = columnTasks.length
+      ? columnTasks[columnTasks.length - 1]!.position + 1
+      : 0
 
-    let position: number
-    if (columnTasks.length === 0) {
-      position = 0
-    } else if (insertAt <= 0) {
-      position = columnTasks[0]!.position - 1
-    } else if (insertAt >= columnTasks.length) {
-      position = columnTasks[columnTasks.length - 1]!.position + 1
-    } else {
-      const before = columnTasks[insertAt - 1]!.position
-      const after = columnTasks[insertAt]!.position
-      position = (before + after) / 2
-    }
+    // Clear drag chrome before async work
+    dragTaskRef.current = null
+    overColumnRef.current = null
+    setDragTaskId(null)
+    setOverColumnId(null)
 
     await commitMove(taskId, columnId, position)
   }
 
-  const [isMobile, setIsMobile] = useState(
-    () => typeof window !== 'undefined' && window.innerWidth <= 768,
-  )
-  useEffect(() => {
-    function onResize() {
-      setIsMobile(window.innerWidth <= 768)
-    }
-    window.addEventListener('resize', onResize)
-    return () => window.removeEventListener('resize', onResize)
-  }, [])
-
-  const activeCol =
-    data.columns.find((c) => c.key === activeColumnKey) || data.columns[0]
-
-  function renderColumnTasks(columnId: string, columnTasks: Task[]) {
-    const showPlaceholder = dragTaskId && overColumnId === columnId
-    const insertAt = showPlaceholder ? (overIndex ?? columnTasks.length) : -1
-    const nodes: ReactNode[] = []
-
-    columnTasks.forEach((task, i) => {
-      if (showPlaceholder && insertAt === i) {
-        nodes.push(<DropPlaceholder key={`ph-${columnId}-${i}`} active />)
-      }
-      nodes.push(
-        <TaskCard
-          key={task.id}
-          task={task}
-          onOpen={openEdit}
-          draggable={canWrite && !moving}
-          onDragStart={onDragStart}
-          onDragEnd={onDragEnd}
-          isDragging={dragTaskId === task.id}
-          isSettling={settlingId === task.id}
-        />,
-      )
-    })
-
-    if (showPlaceholder && insertAt >= columnTasks.length) {
-      nodes.push(<DropPlaceholder key={`ph-${columnId}-end`} active />)
-    }
-
-    if (columnTasks.length === 0 && !showPlaceholder) {
-      return (
-        <div className="column-empty">
-          {canWrite ? 'Drop a card here or add a task' : 'No tasks'}
-        </div>
-      )
-    }
-
-    if (columnTasks.length === 0 && showPlaceholder) {
-      return <DropPlaceholder active />
-    }
-
-    return nodes
+  function scrollToColumn(key: string) {
+    setActiveColumnKey(key)
+    const el = document.querySelector(`[data-col-key="${key}"]`)
+    el?.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' })
   }
+
+  const saveLabel =
+    saveState === 'saving'
+      ? 'Saving to cloud…'
+      : saveState === 'saved'
+        ? 'Saved to cloud'
+        : saveState === 'error'
+          ? 'Save failed'
+          : 'Auto-saves to cloud'
 
   return (
     <div className={`board-layout ${dragTaskId ? 'board-layout--dragging' : ''}`}>
@@ -322,18 +285,27 @@ export function BoardView({
         <div>
           <h2 style={{ margin: 0 }}>{data.board.name}</h2>
           <p className="muted" style={{ margin: '4px 0 0', fontSize: '0.9rem' }}>
-            {tasks.length} tasks · {canWrite ? 'edit access' : 'view only'}
-            {moving ? ' · saving…' : ''}
+            {tasks.length} tasks · {canWrite ? 'drag cards between columns' : 'view only'}
           </p>
         </div>
-        {canWrite ? (
-          <button type="button" className="btn btn-primary" onClick={openCreate} disabled={moving}>
-            ＋ New task
-          </button>
-        ) : null}
+        <div className="board-toolbar-right">
+          <span
+            className={`save-pill save-pill--${saveState === 'idle' ? 'idle' : saveState}`}
+            role="status"
+            aria-live="polite"
+          >
+            {saveState === 'saving' ? '⏳' : saveState === 'saved' ? '✓' : saveState === 'error' ? '!' : '☁'}{' '}
+            {saveLabel}
+          </span>
+          {canWrite ? (
+            <button type="button" className="btn btn-primary" onClick={openCreate}>
+              ＋ New task
+            </button>
+          ) : null}
+        </div>
       </div>
 
-      <div className="mobile-tabs" role="tablist" aria-label="Columns">
+      <div className="mobile-tabs" role="tablist" aria-label="Jump to column">
         {data.columns.map((col) => {
           const count = (tasksByColumn.get(col.id) || []).length
           return (
@@ -343,7 +315,7 @@ export function BoardView({
               role="tab"
               aria-selected={col.key === activeColumnKey}
               className={`mobile-tab ${col.key === activeColumnKey ? 'active' : ''}`}
-              onClick={() => setActiveColumnKey(col.key)}
+              onClick={() => scrollToColumn(col.key)}
             >
               {col.name} {count}
             </button>
@@ -351,33 +323,60 @@ export function BoardView({
         })}
       </div>
 
-      <div className={`columns-scroll ${isMobile ? 'mobile-single' : ''}`}>
-        {(isMobile ? (activeCol ? [activeCol] : []) : data.columns).map((col) => {
-          // When hovering another column, hide the card from its source for a cleaner flight.
-          const visibleTasks =
-            dragTaskId && overColumnId && overColumnId !== col.id
-              ? (tasksByColumn.get(col.id) || []).filter((t) => t.id !== dragTaskId)
-              : tasksByColumn.get(col.id) || []
+      {canWrite ? (
+        <p className="drag-hint muted">
+          Drag a card into another column — it saves automatically. Or open a card and use{' '}
+          <strong>Move to column</strong>.
+        </p>
+      ) : null}
 
+      {/* Always show all columns (horizontal scroll on small screens) so DnD can reach targets */}
+      <div className="columns-scroll">
+        {data.columns.map((col) => {
+          const columnTasks = tasksByColumn.get(col.id) || []
           const isTarget = overColumnId === col.id && Boolean(dragTaskId)
 
           return (
             <section
               key={col.id}
               data-col-id={col.id}
+              data-col-key={col.key}
               className={`column ${isTarget ? 'column--drop-target' : ''} ${
                 dragTaskId ? 'column--dragging-active' : ''
               }`}
+              onDragEnter={(e) => onDragEnterColumn(col.id, e)}
               onDragOver={(e) => onDragOverColumn(col.id, e)}
-              onDragLeave={onDragLeaveColumn}
               onDrop={(e) => void onDropColumn(col.id, e)}
               aria-label={col.name}
             >
               <div className="column-header">
                 <span>{col.name}</span>
-                <span className="muted">{(tasksByColumn.get(col.id) || []).length}</span>
+                <span className="muted">{columnTasks.length}</span>
               </div>
-              <div className="column-body">{renderColumnTasks(col.id, visibleTasks)}</div>
+              <div
+                className="column-body"
+                onDragOver={(e) => onDragOverColumn(col.id, e)}
+                onDrop={(e) => void onDropColumn(col.id, e)}
+              >
+                {columnTasks.length === 0 ? (
+                  <div className={`column-empty ${isTarget ? 'column-empty--active' : ''}`}>
+                    {canWrite ? (isTarget ? 'Release to drop' : 'Drop cards here') : 'No tasks'}
+                  </div>
+                ) : (
+                  columnTasks.map((task) => (
+                    <TaskCard
+                      key={task.id}
+                      task={task}
+                      onOpen={openEdit}
+                      draggable={canWrite}
+                      onDragStart={onDragStart}
+                      onDragEnd={onDragEnd}
+                      isDragging={dragTaskId === task.id}
+                      isSettling={settlingId === task.id}
+                    />
+                  ))
+                )}
+              </div>
             </section>
           )
         })}

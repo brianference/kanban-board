@@ -1,9 +1,9 @@
-import type { DragEvent } from 'react'
+import { useRef, type DragEvent, type KeyboardEvent, type MouseEvent } from 'react'
 import type { Task } from '../../types/models'
 import { formatDue, isOverdue } from '../../lib/format'
 
 /**
- * Single task card with drag visual states.
+ * Task card — div-based so HTML5 drag works reliably (buttons break DnD in several browsers).
  */
 export function TaskCard({
   task,
@@ -24,28 +24,55 @@ export function TaskCard({
 }) {
   const due = formatDue(task.dueAt)
   const overdue = isOverdue(task.dueAt)
+  const didDrag = useRef(false)
 
   const classes = [
     'task-card',
     isDragging ? 'task-card--dragging' : '',
     isSettling ? 'task-card--settle' : '',
+    draggable ? 'task-card--draggable' : '',
   ]
     .filter(Boolean)
     .join(' ')
 
+  function handleClick(e: MouseEvent) {
+    // Ignore click that follows a drag
+    if (didDrag.current || isDragging) {
+      e.preventDefault()
+      return
+    }
+    onOpen(task)
+  }
+
+  function handleKey(e: KeyboardEvent) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      onOpen(task)
+    }
+  }
+
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
       className={classes}
-      draggable={draggable}
-      onDragStart={(e) => onDragStart?.(task, e)}
-      onDragEnd={() => onDragEnd?.()}
-      onClick={() => {
-        if (!isDragging) onOpen(task)
+      draggable={Boolean(draggable)}
+      onDragStart={(e) => {
+        didDrag.current = true
+        onDragStart?.(task, e)
       }}
+      onDragEnd={() => {
+        onDragEnd?.()
+        window.setTimeout(() => {
+          didDrag.current = false
+        }, 80)
+      }}
+      onClick={handleClick}
+      onKeyDown={handleKey}
       aria-grabbed={isDragging || undefined}
+      data-task-id={task.id}
     >
-      <span className="task-card-grip" aria-hidden>
+      <span className="task-card-grip" aria-hidden title="Drag">
         ⋮⋮
       </span>
       <div className="task-card-body">
@@ -69,18 +96,6 @@ export function TaskCard({
           ))}
         </div>
       </div>
-    </button>
-  )
-}
-
-/**
- * Drop placeholder shown while dragging over a column slot.
- */
-export function DropPlaceholder({ active }: { active?: boolean }) {
-  return (
-    <div
-      className={`drop-placeholder ${active ? 'drop-placeholder--active' : ''}`}
-      aria-hidden
-    />
+    </div>
   )
 }
