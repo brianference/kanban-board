@@ -55,11 +55,56 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     }
   }
 
+  const attachmentsByTask = new Map<
+    string,
+    Array<{
+      id: string
+      filename: string
+      contentType: string
+      sizeBytes: number
+      url: string
+      createdAt: number
+    }>
+  >()
+  if (taskIds.length) {
+    const placeholders = taskIds.map(() => '?').join(',')
+    const { results: attRows } = await context.env.DB.prepare(
+      `SELECT id, task_id AS taskId, filename, content_type AS contentType,
+              size_bytes AS sizeBytes, created_at AS createdAt
+         FROM task_attachments
+        WHERE task_id IN (${placeholders})
+        ORDER BY created_at ASC`,
+    )
+      .bind(...taskIds)
+      .all<{
+        id: string
+        taskId: string
+        filename: string
+        contentType: string
+        sizeBytes: number
+        createdAt: number
+      }>()
+    for (const row of attRows ?? []) {
+      const list = attachmentsByTask.get(row.taskId) || []
+      list.push({
+        id: row.id,
+        filename: row.filename,
+        contentType: row.contentType,
+        sizeBytes: row.sizeBytes,
+        url: `/api/attachments/${row.id}`,
+        createdAt: row.createdAt,
+      })
+      attachmentsByTask.set(row.taskId, list)
+    }
+  }
+
   const tasks = (taskRows ?? []).map((t) => {
     const row = t as Record<string, unknown>
+    const id = String(row.id)
     return {
       ...row,
-      tags: tagsByTask.get(String(row.id)) || [],
+      tags: tagsByTask.get(id) || [],
+      attachments: attachmentsByTask.get(id) || [],
     }
   })
 

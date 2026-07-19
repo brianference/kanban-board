@@ -9,17 +9,20 @@ import type {
   BoardSummary,
   TemplateId,
   User,
+  TaskAttachment,
 } from '../types/models'
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const headers = new Headers(init?.headers)
+  if (!headers.has('Accept')) headers.set('Accept', 'application/json')
+  // Only set JSON content-type when body is not FormData
+  if (init?.body && !(init.body instanceof FormData) && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json')
+  }
   const res = await fetch(path, {
     credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-      ...(init?.headers || {}),
-    },
     ...init,
+    headers,
   })
   const data = (await res.json().catch(() => ({}))) as T & { error?: string }
   if (!res.ok) {
@@ -120,4 +123,19 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ token }),
     }),
+
+  listAttachments: (taskId: string) =>
+    request<{ attachments: TaskAttachment[] }>(`/api/tasks/${taskId}/attachments`),
+
+  uploadAttachment: (taskId: string, file: File) => {
+    const body = new FormData()
+    body.append('file', file)
+    return request<{ ok: true; attachment: TaskAttachment }>(
+      `/api/tasks/${taskId}/attachments`,
+      { method: 'POST', body },
+    )
+  },
+
+  deleteAttachment: (attachmentId: string) =>
+    request<{ ok: true }>(`/api/attachments/${attachmentId}`, { method: 'DELETE' }),
 }

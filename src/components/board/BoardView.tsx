@@ -394,11 +394,15 @@ export function BoardView({
         columns={data.columns}
         members={members}
         initial={formInitial}
+        taskId={editing?.id ?? null}
+        canWrite={canWrite}
+        initialAttachments={editing?.attachments ?? []}
         onClose={() => setModalOpen(false)}
         onSave={saveTask}
         onDelete={editing && canWrite ? deleteTask : undefined}
         showMoveSheet={Boolean(editing && canWrite)}
         onMoveToColumn={editing && canWrite ? moveToColumn : undefined}
+        onAttachmentsChange={() => void onReload()}
       />
     </div>
   )

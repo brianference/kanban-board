@@ -33,6 +33,15 @@ export interface Column {
   position: number
 }
 
+export interface TaskAttachment {
+  id: string
+  filename: string
+  contentType: string
+  sizeBytes: number
+  url: string
+  createdAt: number
+}
+
 export interface Task {
   id: string
   boardId: string
@@ -49,6 +58,7 @@ export interface Task {
   createdAt: number
   updatedAt: number
   tags: string[]
+  attachments?: TaskAttachment[]
 }
 
 export interface BoardPayload {

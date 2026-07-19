@@ -3,7 +3,7 @@ const KEY = 'kb-theme'
 export type Theme = 'light' | 'dark'
 
 /**
- * Read stored theme or system preference.
+ * Read stored theme. First visit always defaults to light (ignore OS preference).
  */
 export function getInitialTheme(): Theme {
   try {
@@ -11,9 +11,6 @@ export function getInitialTheme(): Theme {
     if (stored === 'light' || stored === 'dark') return stored
   } catch {
     /* ignore */
-  }
-  if (typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    return 'dark'
   }
   return 'light'
 }

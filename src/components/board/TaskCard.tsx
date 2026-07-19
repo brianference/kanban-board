@@ -89,12 +89,24 @@ export function TaskCard({
           {task.assigneeName || task.assigneeEmail ? (
             <span className="chip">👤 {task.assigneeName || task.assigneeEmail}</span>
           ) : null}
+          {(task.attachments?.length ?? 0) > 0 ? (
+            <span className="chip" title="Has images">
+              📎 {task.attachments!.length}
+            </span>
+          ) : null}
           {task.tags.map((tag) => (
             <span key={tag} className="chip">
               #{tag}
             </span>
           ))}
         </div>
+        {(task.attachments?.length ?? 0) > 0 ? (
+          <div className="card-thumbs" aria-hidden>
+            {task.attachments!.slice(0, 3).map((a) => (
+              <img key={a.id} src={a.url} alt="" className="card-thumb" loading="lazy" />
+            ))}
+          </div>
+        ) : null}
       </div>
     </div>
   )
