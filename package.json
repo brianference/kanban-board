@@ -12,7 +12,11 @@
     "db:migrate": "npx wrangler d1 migrations apply kanban-board-db --remote",
     "test:sim": "node scripts/sim-fullstack.mjs",
     "test:e2e": "node scripts/e2e-prod.mjs",
-    "test:all": "node scripts/e2e-prod.mjs",
+    "test:api": "node scripts/test-comprehensive.mjs",
+    "test:pw": "node scripts/test-playwright-suite.mjs",
+    "test:users": "node scripts/test-100-users.mjs",
+    "test:all": "node scripts/test-all-suites.mjs",
+    "test:campaign": "node scripts/test-all-suites.mjs",
     "release:notes": "node -e \"console.log('See docs/releases/v4.0.0.md')\""
   },
   "engines": {

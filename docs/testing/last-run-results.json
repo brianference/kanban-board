@@ -1,0 +1,932 @@
+{
+  "generatedAt": "2026-07-19T20:54:41.784Z",
+  "base": "https://kanban-board-public.pages.dev",
+  "totals": {
+    "passed": 89,
+    "failed": 12,
+    "skipped": 1,
+    "total": 102
+  },
+  "suites": [
+    {
+      "suite": "comprehensive-api",
+      "passed": 63,
+      "failed": 0,
+      "skipped": 0,
+      "total": 63,
+      "durationMs": 6577,
+      "results": [
+        {
+          "id": "UAT-002",
+          "name": "health ok",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-002b",
+          "name": "health db up",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-002c",
+          "name": "health version",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-001",
+          "name": "homepage 200",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-001b",
+          "name": "homepage branding",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-003",
+          "name": "JS bundle 200",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-004",
+          "name": "CSS bundle 200",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-005",
+          "name": "/robots.txt 200",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-006",
+          "name": "/favicon.svg 200",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-007",
+          "name": "/register SPA shell",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-008",
+          "name": "/login SPA shell",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-015",
+          "name": "short password rejected",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-016",
+          "name": "invalid email rejected",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-009",
+          "name": "register 201",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-009b",
+          "name": "register cookie",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-009c",
+          "name": "register projectId",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-010",
+          "name": "session email",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-017",
+          "name": "session no cookie 401",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-014",
+          "name": "duplicate email rejected",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-011",
+          "name": "logout",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-013",
+          "name": "bad login 401",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-012",
+          "name": "login ok",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-018",
+          "name": "cross-origin blocked",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-021",
+          "name": "list projects",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-030",
+          "name": "empty project name rejected",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-022",
+          "name": "create project",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-022b",
+          "name": "boardId returned",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-023",
+          "name": "get project owner",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-031",
+          "name": "get board",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-032",
+          "name": "columns count 5",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-028",
+          "name": "template starter tasks",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-033",
+          "name": "create task",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-035",
+          "name": "patch task",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-036",
+          "name": "priority critical",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-044",
+          "name": "description persists",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-034",
+          "name": "move task",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-034b",
+          "name": "column after move",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-046",
+          "name": "add checklist",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-047",
+          "name": "toggle checklist",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-063",
+          "name": "post comment",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-064",
+          "name": "comment with image",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-064b",
+          "name": "comment image magic PNG",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-073",
+          "name": "empty comment rejected",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-053",
+          "name": "upload PNG",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-053b",
+          "name": "PNG magic",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-058",
+          "name": "attachment auth required",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-059",
+          "name": "delete attachment",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-056",
+          "name": "reject non-image",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-057",
+          "name": "reject oversized",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-075",
+          "name": "search 200",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-075b",
+          "name": "search finds task",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-079",
+          "name": "contact 201",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-081a",
+          "name": "/privacy 200",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-081b",
+          "name": "/terms 200",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-082a",
+          "name": "/about 200",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-082b",
+          "name": "/contact 200",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-025setup",
+          "name": "second user",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-027",
+          "name": "foreign task blocked",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-026",
+          "name": "foreign board blocked",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-025",
+          "name": "foreign project blocked",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-074",
+          "name": "foreign comment blocked",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-037",
+          "name": "delete task cleanup",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-024",
+          "name": "delete project",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        }
+      ],
+      "bugs": [],
+      "learnings": [
+        {
+          "suite": "comprehensive-api",
+          "msg": "Auth forms are client-rendered; static fetch only proves SPA shell, not form DOM",
+          "at": "2026-07-19T20:51:15.015Z"
+        },
+        {
+          "suite": "comprehensive-api",
+          "msg": "Origin check on mutating auth routes returns 403 for foreign Origin",
+          "at": "2026-07-19T20:51:16.458Z"
+        }
+      ]
+    },
+    {
+      "suite": "playwright-visual-ux-mobile",
+      "passed": 25,
+      "failed": 1,
+      "skipped": 0,
+      "total": 26,
+      "durationMs": 88985,
+      "results": [
+        {
+          "id": "UAT-009",
+          "name": "API register for UI tests",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-001",
+          "name": "home branding",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-029",
+          "name": "dashboard route",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-085",
+          "name": "board workspace panel",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-084a",
+          "name": "footer present",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-084",
+          "name": "black footer class/bg",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-086",
+          "name": "priority pills on cards",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-040",
+          "name": "drag grip visible",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-096-desk",
+          "name": "no page horizontal overflow desktop",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-087",
+          "name": "focus lands on control",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-039",
+          "name": "board text filter interaction",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-043",
+          "name": "task detail route",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-052",
+          "name": "form labels present",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-063-ui",
+          "name": "can type comment with mention/tag",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-068-partial",
+          "name": "typed @ for mention",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-062-ui",
+          "name": "images section visible",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-092",
+          "name": "theme toggles",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-077",
+          "name": "header search typing",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UX-CONSOLE",
+          "name": "no severe console errors (CSP inline noted separately)",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-093",
+          "name": "mobile column tabs present",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-042",
+          "name": "mobile tab switches column",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-096",
+          "name": "no horizontal page scroll mobile",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-095",
+          "name": "mobile menu opens",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-094",
+          "name": "task form controls present mobile",
+          "status": "fail",
+          "detail": "assertion failed",
+          "ms": 0
+        },
+        {
+          "id": "UAT-088",
+          "name": "primary touch targets reasonable",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-078",
+          "name": "header search unauth placeholder",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        }
+      ],
+      "bugs": [
+        {
+          "id": "UAT-094",
+          "name": "task form controls present mobile",
+          "detail": "assertion failed",
+          "suite": "playwright-visual-ux-mobile",
+          "severity": "found"
+        }
+      ],
+      "learnings": [
+        {
+          "suite": "playwright-visual-ux-mobile",
+          "msg": "Primary controls min height 38.390625px — below 44px WCAG 2.5.5 AAA, OK for AA if spacing allows",
+          "at": "2026-07-19T20:52:49.034Z"
+        }
+      ]
+    },
+    {
+      "suite": "100-user-sim",
+      "passed": 1,
+      "failed": 11,
+      "skipped": 0,
+      "total": 12,
+      "durationMs": 111755,
+      "results": [
+        {
+          "id": "UAT-097",
+          "name": "health 50 concurrent 50/50",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-098",
+          "name": "register+journey success 45/100",
+          "status": "fail",
+          "detail": "assertion failed",
+          "ms": 0
+        },
+        {
+          "id": "UAT-099",
+          "name": "create task success among users",
+          "status": "fail",
+          "detail": "assertion failed",
+          "ms": 0
+        },
+        {
+          "id": "user-15",
+          "name": "user journey failed",
+          "status": "fail",
+          "detail": "register 429",
+          "ms": 0
+        },
+        {
+          "id": "user-16",
+          "name": "user journey failed",
+          "status": "fail",
+          "detail": "register 429",
+          "ms": 0
+        },
+        {
+          "id": "user-17",
+          "name": "user journey failed",
+          "status": "fail",
+          "detail": "register 429",
+          "ms": 0
+        },
+        {
+          "id": "user-18",
+          "name": "user journey failed",
+          "status": "fail",
+          "detail": "register 429",
+          "ms": 0
+        },
+        {
+          "id": "user-19",
+          "name": "user journey failed",
+          "status": "fail",
+          "detail": "register 429",
+          "ms": 0
+        },
+        {
+          "id": "user-20",
+          "name": "user journey failed",
+          "status": "fail",
+          "detail": "register 429",
+          "ms": 0
+        },
+        {
+          "id": "user-21",
+          "name": "user journey failed",
+          "status": "fail",
+          "detail": "register 429",
+          "ms": 0
+        },
+        {
+          "id": "user-22",
+          "name": "user journey failed",
+          "status": "fail",
+          "detail": "register 429",
+          "ms": 0
+        },
+        {
+          "id": "STRESS-001",
+          "name": "spike 30 concurrent journeys 6/30",
+          "status": "fail",
+          "detail": "assertion failed",
+          "ms": 0
+        }
+      ],
+      "bugs": [
+        {
+          "id": "UAT-098",
+          "name": "register+journey success 45/100",
+          "detail": "assertion failed",
+          "suite": "100-user-sim",
+          "severity": "found"
+        },
+        {
+          "id": "UAT-099",
+          "name": "create task success among users",
+          "detail": "assertion failed",
+          "suite": "100-user-sim",
+          "severity": "found"
+        },
+        {
+          "id": "user-15",
+          "name": "user journey failed",
+          "detail": "register 429",
+          "suite": "100-user-sim",
+          "severity": "found"
+        },
+        {
+          "id": "user-16",
+          "name": "user journey failed",
+          "detail": "register 429",
+          "suite": "100-user-sim",
+          "severity": "found"
+        },
+        {
+          "id": "user-17",
+          "name": "user journey failed",
+          "detail": "register 429",
+          "suite": "100-user-sim",
+          "severity": "found"
+        },
+        {
+          "id": "user-18",
+          "name": "user journey failed",
+          "detail": "register 429",
+          "suite": "100-user-sim",
+          "severity": "found"
+        },
+        {
+          "id": "user-19",
+          "name": "user journey failed",
+          "detail": "register 429",
+          "suite": "100-user-sim",
+          "severity": "found"
+        },
+        {
+          "id": "user-20",
+          "name": "user journey failed",
+          "detail": "register 429",
+          "suite": "100-user-sim",
+          "severity": "found"
+        },
+        {
+          "id": "user-21",
+          "name": "user journey failed",
+          "detail": "register 429",
+          "suite": "100-user-sim",
+          "severity": "found"
+        },
+        {
+          "id": "user-22",
+          "name": "user journey failed",
+          "detail": "register 429",
+          "suite": "100-user-sim",
+          "severity": "found"
+        },
+        {
+          "id": "STRESS-001",
+          "name": "spike 30 concurrent journeys 6/30",
+          "detail": "assertion failed",
+          "suite": "100-user-sim",
+          "severity": "found"
+        }
+      ],
+      "learnings": [
+        {
+          "suite": "100-user-sim",
+          "msg": "register: n=45 p50=725ms p95=885ms max=1014ms",
+          "at": "2026-07-19T20:54:37.113Z"
+        },
+        {
+          "suite": "100-user-sim",
+          "msg": "session: n=45 p50=25ms p95=31ms max=60ms",
+          "at": "2026-07-19T20:54:37.113Z"
+        },
+        {
+          "suite": "100-user-sim",
+          "msg": "board: n=45 p50=240ms p95=276ms max=314ms",
+          "at": "2026-07-19T20:54:37.113Z"
+        },
+        {
+          "suite": "100-user-sim",
+          "msg": "createTask: n=45 p50=175ms p95=201ms max=216ms",
+          "at": "2026-07-19T20:54:37.113Z"
+        },
+        {
+          "suite": "100-user-sim",
+          "msg": "comment: n=45 p50=131ms p95=162ms max=170ms",
+          "at": "2026-07-19T20:54:37.113Z"
+        },
+        {
+          "suite": "100-user-sim",
+          "msg": "search: n=45 p50=76ms p95=112ms max=135ms",
+          "at": "2026-07-19T20:54:37.113Z"
+        },
+        {
+          "suite": "100-user-sim",
+          "msg": "move: n=45 p50=150ms p95=180ms max=201ms",
+          "at": "2026-07-19T20:54:37.113Z"
+        },
+        {
+          "suite": "100-user-sim",
+          "msg": "Full journey: success=45/100 (45.0%) wall=106794ms p50=1722ms p95=1843ms concurrency=3",
+          "at": "2026-07-19T20:54:37.113Z"
+        },
+        {
+          "suite": "100-user-sim",
+          "msg": "Failure sample errors: register 429",
+          "at": "2026-07-19T20:54:37.113Z"
+        },
+        {
+          "suite": "100-user-sim",
+          "msg": "Stress spike: 6/30 concurrent full journeys succeeded",
+          "at": "2026-07-19T20:54:41.784Z"
+        }
+      ]
+    },
+    {
+      "suite": "e2e-prod-reference",
+      "passed": 0,
+      "failed": 0,
+      "skipped": 1,
+      "total": 1,
+      "durationMs": 0,
+      "results": [
+        {
+          "id": "REF",
+          "name": "see npm run test:e2e",
+          "status": "skip",
+          "detail": "core path covered by comprehensive-api"
+        }
+      ],
+      "bugs": [],
+      "learnings": [
+        {
+          "suite": "e2e-prod-reference",
+          "msg": "Full e2e-prod.mjs remains available via npm run test:e2e"
+        }
+      ]
+    }
+  ]
+}
