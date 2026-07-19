@@ -1,77 +1,56 @@
-/** JSON, cookies, CSRF/origin helpers for Pages Functions. */
+/** JSON + cookie helpers. */
 
-const COOKIE_NAME = 'kb_session'
-const SESSION_TTL_SECONDS = 60 * 60 * 24 * 30 // 30 days
+const COOKIE = 'fb_token'
+const MAX_AGE = 60 * 60 * 24 * 30
 
-/**
- * Build a JSON response with no-store cache policy.
- */
 export function json(
   body: unknown,
   status = 200,
-  extraHeaders: Record<string, string> = {},
+  extra: Record<string, string> = {},
 ): Response {
   return new Response(JSON.stringify(body), {
     status,
     headers: {
       'Content-Type': 'application/json; charset=utf-8',
       'Cache-Control': 'no-store',
-      ...extraHeaders,
+      ...extra,
     },
   })
 }
 
-/**
- * Read a named cookie value from the request.
- */
 export function readCookie(request: Request, name: string): string | null {
-  const cookie = request.headers.get('Cookie') || ''
-  const match = cookie.match(new RegExp(`(?:^|; )${name}=([^;]+)`))
-  return match?.[1] ? decodeURIComponent(match[1]) : null
+  const raw = request.headers.get('Cookie') || ''
+  const m = raw.match(new RegExp(`(?:^|; )${name}=([^;]+)`))
+  return m?.[1] ? decodeURIComponent(m[1]) : null
 }
 
-/**
- * Serialize an httpOnly session cookie.
- */
-export function sessionCookie(id: string): string {
+export function sessionCookie(token: string): string {
   return [
-    `${COOKIE_NAME}=${id}`,
+    `${COOKIE}=${encodeURIComponent(token)}`,
     'Path=/',
     'HttpOnly',
     'Secure',
     'SameSite=Lax',
-    `Max-Age=${SESSION_TTL_SECONDS}`,
+    `Max-Age=${MAX_AGE}`,
   ].join('; ')
 }
 
-/**
- * Clear the session cookie.
- */
 export function clearSessionCookie(): string {
-  return `${COOKIE_NAME}=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0`
+  return `${COOKIE}=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0`
 }
 
-/**
- * Read session id from cookie.
- */
-export function readSessionId(request: Request): string | null {
-  return readCookie(request, COOKIE_NAME)
+export function readSessionToken(request: Request): string | null {
+  const bearer = request.headers.get('Authorization')
+  if (bearer?.startsWith('Bearer ')) return bearer.slice(7)
+  return readCookie(request, COOKIE)
 }
 
-export { SESSION_TTL_SECONDS, COOKIE_NAME }
-
-/**
- * Reject cross-site mutating requests (CSRF defense for cookie sessions).
- */
 export function assertSameOrigin(request: Request): Response | null {
   if (request.method === 'GET' || request.method === 'HEAD' || request.method === 'OPTIONS') {
     return null
   }
   const origin = request.headers.get('Origin')
-  if (!origin) {
-    // Non-browser clients (curl/tests) may omit Origin — allow when no Origin present.
-    return null
-  }
+  if (!origin) return null
   const url = new URL(request.url)
   if (origin !== url.origin) {
     return json({ error: 'Cross-origin request blocked' }, 403)
@@ -79,9 +58,6 @@ export function assertSameOrigin(request: Request): Response | null {
   return null
 }
 
-/**
- * Parse JSON body safely.
- */
 export async function readJson<T>(request: Request): Promise<T | null> {
   try {
     return (await request.json()) as T
@@ -89,3 +65,5 @@ export async function readJson<T>(request: Request): Promise<T | null> {
     return null
   }
 }
+
+export { COOKIE, MAX_AGE }

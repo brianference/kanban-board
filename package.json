@@ -1,16 +1,19 @@
 {
   "name": "flowboard",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "private": true,
-  "description": "FlowBoard full-stack kanban — Vite React Tailwind + Express SQLite JWT",
+  "description": "FlowBoard multi-user kanban — Cloudflare Pages Functions + D1 + Vite React",
   "scripts": {
-    "install:all": "npm install --prefix server && npm install --prefix client",
-    "dev:server": "npm run dev --prefix server",
+    "install:all": "npm install --prefix client",
+    "dev": "npx wrangler pages dev client/dist --d1=DB --compatibility-date=2026-07-01",
     "dev:client": "npm run dev --prefix client",
     "build": "npm run build --prefix client",
-    "start": "npm run start --prefix server",
+    "deploy": "npm run build && npx wrangler pages deploy client/dist --project-name kanban-board-public --branch main",
+    "db:migrate": "npx wrangler d1 migrations apply kanban-board-db --remote",
     "test:sim": "node scripts/sim-fullstack.mjs",
-    "release:notes": "node -e \"console.log('See docs/releases/v3.0.0.md')\""
+    "test:e2e": "node scripts/e2e-prod.mjs",
+    "test:all": "node scripts/e2e-prod.mjs",
+    "release:notes": "node -e \"console.log('See docs/releases/v4.0.0.md')\""
   },
   "engines": {
     "node": ">=20"

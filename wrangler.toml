@@ -1,9 +1,12 @@
 name = "kanban-board-public"
 compatibility_date = "2026-07-01"
-pages_build_output_dir = "dist"
+pages_build_output_dir = "client/dist"
 
 [[d1_databases]]
 binding = "DB"
 database_name = "kanban-board-db"
 database_id = "32220ac9-e1f1-4297-bad8-438885777cb0"
 migrations_dir = "migrations"
+
+# Set production secret: npx wrangler pages secret put JWT_SECRET --project-name kanban-board-public
+# Local: create .dev.vars with JWT_SECRET=...

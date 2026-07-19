@@ -1,18 +1,11 @@
-/** PATCH /api/columns/:columnId — rename / WIP limit */
 import type { Env } from '../../_lib/types'
 import { assertSameOrigin, json, readJson } from '../../_lib/http'
 import { requireSession } from '../../_lib/auth'
-import { getBoardAccess } from '../../_lib/tenancy'
-
-interface Body {
-  name?: string
-  wipLimit?: number | null
-}
+import { canWrite, getBoardAccess } from '../../_lib/tenancy'
 
 export const onRequestPatch: PagesFunction<Env> = async (context) => {
   const blocked = assertSameOrigin(context.request)
   if (blocked) return blocked
-
   const session = await requireSession(context.env, context.request)
   if (session instanceof Response) return session
 
@@ -25,9 +18,9 @@ export const onRequestPatch: PagesFunction<Env> = async (context) => {
   if (!col) return json({ error: 'Not found' }, 404)
 
   const access = await getBoardAccess(context.env, session.userId, col.boardId)
-  if (!access || access.role === 'viewer') return json({ error: 'Not found' }, 404)
+  if (!access || !canWrite(access.role)) return json({ error: 'Not found' }, 404)
 
-  const body = await readJson<Body>(context.request)
+  const body = await readJson<{ name?: string; wipLimit?: number | null }>(context.request)
   const name = body?.name !== undefined ? body.name.trim().slice(0, 60) : col.name
   if (!name) return json({ error: 'name required' }, 400)
 
@@ -36,14 +29,11 @@ export const onRequestPatch: PagesFunction<Env> = async (context) => {
     if (body.wipLimit === null || body.wipLimit === undefined) wip = null
     else if (typeof body.wipLimit === 'number' && body.wipLimit >= 0 && body.wipLimit <= 99) {
       wip = Math.floor(body.wipLimit)
-    } else {
-      return json({ error: 'wipLimit must be 0–99 or null' }, 400)
-    }
+    } else return json({ error: 'Invalid wipLimit' }, 400)
   }
 
   await context.env.DB.prepare(`UPDATE columns SET name = ?, wip_limit = ? WHERE id = ?`)
     .bind(name, wip, columnId)
     .run()
-
   return json({ ok: true, name, wipLimit: wip })
 }

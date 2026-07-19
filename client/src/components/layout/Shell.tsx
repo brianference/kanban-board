@@ -3,13 +3,13 @@ import { Header } from './Header'
 import { Footer } from './Footer'
 
 /**
- * Public page shell: sticky header + main + footer.
+ * App shell — one background from header through main to footer.
  */
 export function Shell({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="app-shell">
       <Header />
-      <main className="flex-1">{children}</main>
+      <main className="app-main">{children}</main>
       <Footer />
     </div>
   )

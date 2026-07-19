@@ -3,9 +3,13 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Shell } from '../components/layout/Shell'
 import { Seo } from '../components/Seo'
 import { Breadcrumb } from '../components/layout/Breadcrumb'
+import { TaskCard } from '../components/board/TaskCard'
 import { api, type BoardPayload, type Task } from '../lib/api'
 import { useToast } from '../hooks/useToast'
 
+/**
+ * Project board — unified workspace chrome with legacy-style cards.
+ */
 export function BoardPage() {
   const { projectId = '' } = useParams()
   const nav = useNavigate()
@@ -17,6 +21,8 @@ export function BoardPage() {
   const [q, setQ] = useState('')
   const [priority, setPriority] = useState('')
   const [dragId, setDragId] = useState<string | null>(null)
+  const [overColumnId, setOverColumnId] = useState<string | null>(null)
+  const [mobileColId, setMobileColId] = useState<string | null>(null)
 
   const load = useCallback(async () => {
     setError(null)
@@ -30,6 +36,7 @@ export function BoardPage() {
       }
       const board = await api.getBoard(boardId)
       setPayload(board)
+      setMobileColId((prev) => prev || board.columns[0]?.id || null)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load board')
     } finally {
@@ -65,6 +72,7 @@ export function BoardPage() {
 
   async function onDrop(columnId: string, e: DragEvent) {
     e.preventDefault()
+    setOverColumnId(null)
     const taskId = e.dataTransfer.getData('text/plain') || dragId
     if (!taskId || !payload) return
     const list = (byCol.get(columnId) || []).filter((t) => t.id !== taskId)
@@ -80,10 +88,18 @@ export function BoardPage() {
     }
   }
 
+  const canWrite = payload ? payload.role !== 'viewer' : false
+  const colCount = payload?.columns.length || 5
+
   return (
     <Shell>
-      <Seo title={projectName} description={`Board for ${projectName}`} path={`/app/projects/${projectId}`} noIndex />
-      <div className="mx-auto max-w-[1400px] px-4 py-8 sm:px-6">
+      <Seo
+        title={projectName}
+        description={`Board for ${projectName}`}
+        path={`/app/projects/${projectId}`}
+        noIndex
+      />
+      <div className="board-page">
         <Breadcrumb
           items={[
             { label: 'Home', to: '/' },
@@ -91,105 +107,163 @@ export function BoardPage() {
             { label: projectName },
           ]}
         />
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <h1 className="font-display text-3xl font-bold tracking-tight">{projectName}</h1>
-            <p className="mt-1 text-ink-500">
-              {payload ? `${filtered.length} / ${payload.tasks.length} tasks shown` : 'Loading board…'}
-            </p>
+
+        <div className="board-workspace">
+          <div className="board-toolbar">
+            <div>
+              <h1>{projectName}</h1>
+              <p className="meta">
+                {payload
+                  ? `${filtered.length} / ${payload.tasks.length} tasks · ${
+                      canWrite ? 'drag to move · auto-saves' : 'view only'
+                    }`
+                  : 'Loading board…'}
+              </p>
+            </div>
+            <div className="board-toolbar-actions">
+              <Link to="/app" className="btn btn-sm">
+                All projects
+              </Link>
+            </div>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <Link to={`/search?projectId=${projectId}`} className="btn">
-              Search
-            </Link>
-            <Link to="/app" className="btn">
-              All projects
-            </Link>
+
+          <div className="board-filters">
+            <input
+              className="input"
+              placeholder="Filter this board…"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              aria-label="Filter board"
+            />
+            <select
+              className="input"
+              value={priority}
+              onChange={(e) => setPriority(e.target.value)}
+              aria-label="Priority"
+            >
+              <option value="">All priorities</option>
+              <option value="critical">Critical</option>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
           </div>
-        </div>
 
-        <div className="mt-6 flex flex-wrap gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-soft">
-          <input
-            className="input max-w-md flex-1"
-            placeholder="Filter this board…"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            aria-label="Filter board"
-          />
-          <select className="input w-auto" value={priority} onChange={(e) => setPriority(e.target.value)} aria-label="Priority">
-            <option value="">All priorities</option>
-            <option value="critical">Critical</option>
-            <option value="high">High</option>
-            <option value="medium">Medium</option>
-            <option value="low">Low</option>
-          </select>
-        </div>
+          {error ? (
+            <p className="px-5 py-4 font-medium text-red-600">{error}</p>
+          ) : null}
+          {loading ? (
+            <p className="px-5 py-12 text-center text-[var(--text-muted)]">Loading board…</p>
+          ) : null}
 
-        {error ? <p className="mt-6 font-medium text-red-600">{error}</p> : null}
-        {loading ? <p className="mt-10 text-center text-ink-500">Loading board…</p> : null}
+          {payload ? (
+            <>
+              <div className="board-mobile-tabs lg:hidden" role="tablist" aria-label="Jump to column">
+                {payload.columns.map((col) => {
+                  const count = (byCol.get(col.id) || []).length
+                  const active = mobileColId === col.id
+                  return (
+                    <button
+                      key={col.id}
+                      type="button"
+                      role="tab"
+                      aria-selected={active}
+                      className={`mobile-col-tab ${active ? 'mobile-col-tab--active' : ''}`}
+                      onClick={() => setMobileColId(col.id)}
+                    >
+                      {col.name} <span className="opacity-70">{count}</span>
+                    </button>
+                  )
+                })}
+              </div>
 
-        {payload ? (
-          <div className="mt-6 flex gap-4 overflow-x-auto pb-6">
-            {payload.columns.map((col) => {
-              const tasks = byCol.get(col.id) || []
-              return (
-                <section
-                  key={col.id}
-                  className="flex w-[min(300px,85vw)] shrink-0 flex-col rounded-2xl border border-slate-200 bg-white/90 shadow-soft"
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={(e) => void onDrop(col.id, e)}
+              <div className="board-columns-wrap">
+                <div
+                  className="board-columns"
+                  style={{ ['--board-cols' as string]: String(colCount) }}
+                  data-dragging={dragId ? 'true' : 'false'}
                 >
-                  <header className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
-                    <h2 className="font-display text-sm font-bold">{col.name}</h2>
-                    <span className="text-xs font-semibold text-ink-500">{tasks.length}</span>
-                  </header>
-                  <div className="flex flex-1 flex-col gap-3 p-3">
-                    {tasks.length === 0 ? (
-                      <div className="rounded-xl border border-dashed border-slate-200 px-3 py-10 text-center text-sm text-ink-500">
-                        Drop cards here
-                      </div>
-                    ) : (
-                      tasks.map((task) => (
-                        <article
-                          key={task.id}
-                          draggable={payload.role !== 'viewer'}
-                          onDragStart={(e) => {
-                            setDragId(task.id)
-                            e.dataTransfer.setData('text/plain', task.id)
-                          }}
-                          onDragEnd={() => setDragId(null)}
-                          className={`cursor-grab rounded-xl border border-slate-200 bg-slate-50 p-3 transition hover:border-brand-300 hover:shadow-lift ${
-                            dragId === task.id ? 'opacity-40' : ''
-                          }`}
-                          onClick={() => nav(`/app/tasks/${task.id}`)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') nav(`/app/tasks/${task.id}`)
-                          }}
-                          role="button"
-                          tabIndex={0}
-                        >
-                          <h3 className="font-semibold text-ink-900">{task.title}</h3>
-                          {task.description ? (
-                            <p className="mt-1 line-clamp-2 text-sm text-ink-500">{task.description}</p>
-                          ) : null}
-                          <div className="mt-2 flex flex-wrap gap-1.5">
-                            <span className="chip">{task.priority}</span>
-                            {task.dueAt ? (
-                              <span className="chip">📅 {new Date(task.dueAt).toLocaleDateString()}</span>
-                            ) : null}
-                            {(task.attachments?.length || 0) > 0 ? (
-                              <span className="chip">📎 {task.attachments!.length}</span>
-                            ) : null}
-                          </div>
-                        </article>
-                      ))
-                    )}
-                  </div>
-                </section>
-              )
-            })}
-          </div>
-        ) : null}
+                  {payload.columns.map((col) => {
+                    const tasks = byCol.get(col.id) || []
+                    const isTarget = overColumnId === col.id && Boolean(dragId)
+                    const hideOnMobile = mobileColId !== null && mobileColId !== col.id
+                    return (
+                      <section
+                        key={col.id}
+                        className={[
+                          'board-column',
+                          isTarget ? 'board-column--drop' : '',
+                          hideOnMobile ? 'board-column--mobile-hide' : '',
+                        ]
+                          .filter(Boolean)
+                          .join(' ')}
+                        onDragEnter={(e) => {
+                          e.preventDefault()
+                          if (dragId) setOverColumnId(col.id)
+                        }}
+                        onDragOver={(e) => {
+                          e.preventDefault()
+                          if (dragId) setOverColumnId(col.id)
+                        }}
+                        onDragLeave={(e) => {
+                          if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                            setOverColumnId((id) => (id === col.id ? null : id))
+                          }
+                        }}
+                        onDrop={(e) => void onDrop(col.id, e)}
+                        aria-label={col.name}
+                      >
+                        <header className="board-column-header">
+                          <h2 className="board-column-title">
+                            <span
+                              className={`board-column-dot board-column-dot--${col.key || 'default'}`}
+                              aria-hidden
+                            />
+                            {col.name}
+                          </h2>
+                          <span className="board-column-count">{tasks.length}</span>
+                        </header>
+                        <div className="board-column-body">
+                          {tasks.length === 0 ? (
+                            <div
+                              className={`board-column-empty ${isTarget ? 'board-column-empty--active' : ''}`}
+                            >
+                              {canWrite
+                                ? isTarget
+                                  ? 'Release to drop'
+                                  : 'Drop cards here'
+                                : 'No tasks'}
+                            </div>
+                          ) : (
+                            tasks.map((task) => (
+                              <TaskCard
+                                key={task.id}
+                                task={task}
+                                columnKey={col.key}
+                                onOpen={(t) => nav(`/app/tasks/${t.id}`)}
+                                draggable={canWrite}
+                                isDragging={dragId === task.id}
+                                onDragStart={(t, e) => {
+                                  setDragId(t.id)
+                                  e.dataTransfer.setData('text/plain', t.id)
+                                  e.dataTransfer.effectAllowed = 'move'
+                                }}
+                                onDragEnd={() => {
+                                  setDragId(null)
+                                  setOverColumnId(null)
+                                }}
+                              />
+                            ))
+                          )}
+                        </div>
+                      </section>
+                    )
+                  })}
+                </div>
+              </div>
+            </>
+          ) : null}
+        </div>
       </div>
     </Shell>
   )

@@ -1,9 +1,7 @@
-/** GET /api/boards/:boardId — board + columns + tasks (+ counts) */
 import type { Env } from '../../_lib/types'
 import { json } from '../../_lib/http'
 import { requireSession } from '../../_lib/auth'
 import { getBoardAccess } from '../../_lib/tenancy'
-import { processRecurringForBoard } from '../../_lib/recurring'
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   const session = await requireSession(context.env, context.request)
@@ -12,13 +10,6 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
   const boardId = context.params.boardId as string
   const access = await getBoardAccess(context.env, session.userId, boardId)
   if (!access) return json({ error: 'Not found' }, 404)
-
-  // Spawn due recurring tasks (templates feature)
-  try {
-    await processRecurringForBoard(context.env, boardId)
-  } catch {
-    /* non-fatal if migration not applied yet on old deploys */
-  }
 
   const board = await context.env.DB.prepare(
     `SELECT id, project_id AS projectId, name, kind, created_at AS createdAt
@@ -50,13 +41,12 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 
   const taskIds = (taskRows ?? []).map((t) => (t as { id: string }).id)
   const tagsByTask = new Map<string, string[]>()
-  const attachmentsByTask = new Map<string, unknown[]>()
-  const checklistByTask = new Map<string, { total: number; done: number }>()
+  const attByTask = new Map<string, unknown[]>()
+  const checkByTask = new Map<string, { total: number; done: number }>()
   const commentsByTask = new Map<string, number>()
 
   if (taskIds.length) {
     const ph = taskIds.map(() => '?').join(',')
-
     const { results: tagRows } = await context.env.DB.prepare(
       `SELECT task_id AS taskId, tag FROM task_tags WHERE task_id IN (${ph})`,
     )
@@ -72,7 +62,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       const { results: attRows } = await context.env.DB.prepare(
         `SELECT id, task_id AS taskId, filename, content_type AS contentType,
                 size_bytes AS sizeBytes, created_at AS createdAt
-           FROM task_attachments WHERE task_id IN (${ph}) ORDER BY created_at ASC`,
+           FROM task_attachments WHERE task_id IN (${ph}) ORDER BY created_at`,
       )
         .bind(...taskIds)
         .all<{
@@ -84,7 +74,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
           createdAt: number
         }>()
       for (const row of attRows ?? []) {
-        const list = attachmentsByTask.get(row.taskId) || []
+        const list = attByTask.get(row.taskId) || []
         list.push({
           id: row.id,
           filename: row.filename,
@@ -93,10 +83,10 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
           url: `/api/attachments/${row.id}`,
           createdAt: row.createdAt,
         })
-        attachmentsByTask.set(row.taskId, list)
+        attByTask.set(row.taskId, list)
       }
     } catch {
-      /* attachments table optional on very old DBs */
+      /* optional */
     }
 
     try {
@@ -107,7 +97,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         .bind(...taskIds)
         .all<{ taskId: string; total: number; done: number }>()
       for (const row of checkRows ?? []) {
-        checklistByTask.set(row.taskId, { total: row.total, done: row.done || 0 })
+        checkByTask.set(row.taskId, { total: row.total, done: row.done || 0 })
       }
     } catch {
       /* */
@@ -128,28 +118,21 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 
   const tasks = (taskRows ?? []).map((t) => {
     const row = t as Record<string, unknown>
-    const id = String(row.id)
-    const cl = checklistByTask.get(id)
+    const tid = String(row.id)
+    const cl = checkByTask.get(tid)
     return {
       ...row,
-      tags: tagsByTask.get(id) || [],
-      attachments: attachmentsByTask.get(id) || [],
+      tags: tagsByTask.get(tid) || [],
+      attachments: attByTask.get(tid) || [],
       checklistTotal: cl?.total ?? 0,
       checklistDone: cl?.done ?? 0,
-      commentCount: commentsByTask.get(id) ?? 0,
-      recurringRule: row.recurringRule || 'none',
+      commentCount: commentsByTask.get(tid) ?? 0,
     }
   })
 
   return json({
     board,
-    columns: (columns ?? []).map((c) => {
-      const col = c as Record<string, unknown>
-      return {
-        ...col,
-        wipLimit: col.wipLimit ?? null,
-      }
-    }),
+    columns: columns ?? [],
     tasks,
     role: access.role,
     projectId: access.projectId,

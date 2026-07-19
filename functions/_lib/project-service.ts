@@ -1,10 +1,9 @@
-/** Create project + default board/columns/tasks from a template. */
 import type { Env } from './types'
 import { randomToken } from './crypto'
-import { resolveTemplate, type TemplateId } from './templates'
+import { resolveTemplate } from './templates'
 
 /**
- * Create a project owned by userId with a templated board.
+ * Create project + board + columns + starter tasks.
  */
 export async function createProjectWithTemplate(
   env: Env,
@@ -17,24 +16,20 @@ export async function createProjectWithTemplate(
   const boardId = randomToken(16)
   const template = resolveTemplate(templateId)
 
-  // Sequential inserts are more reliable than large batches under D1 limits.
   await env.DB.prepare(
-    `INSERT INTO projects (id, name, owner_id, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?)`,
+    `INSERT INTO projects (id, name, owner_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?)`,
   )
     .bind(projectId, name.trim(), userId, now, now)
     .run()
   await env.DB.prepare(
-    `INSERT INTO project_members (project_id, user_id, role, created_at)
-     VALUES (?, ?, 'owner', ?)`,
+    `INSERT INTO project_members (project_id, user_id, role, created_at) VALUES (?, ?, 'owner', ?)`,
   )
     .bind(projectId, userId, now)
     .run()
   await env.DB.prepare(
-    `INSERT INTO boards (id, project_id, name, kind, created_at)
-     VALUES (?, ?, ?, ?, ?)`,
+    `INSERT INTO boards (id, project_id, name, kind, created_at) VALUES (?, ?, ?, 'kanban', ?)`,
   )
-    .bind(boardId, projectId, template.boardName, template.kind, now)
+    .bind(boardId, projectId, template.boardName, now)
     .run()
 
   const columnIds = new Map<string, string>()
@@ -42,23 +37,24 @@ export async function createProjectWithTemplate(
     const colId = randomToken(16)
     columnIds.set(col.key, colId)
     await env.DB.prepare(
-      `INSERT INTO columns (id, board_id, key_name, name, position)
-       VALUES (?, ?, ?, ?, ?)`,
+      `INSERT INTO columns (id, board_id, key_name, name, position, wip_limit)
+       VALUES (?, ?, ?, ?, ?, NULL)`,
     )
       .bind(colId, boardId, col.key, col.name, col.position)
       .run()
   }
 
-  for (let index = 0; index < template.tasks.length; index++) {
-    const task = template.tasks[index]!
+  for (let i = 0; i < template.tasks.length; i++) {
+    const task = template.tasks[i]!
     const columnId = columnIds.get(task.columnKey)
     if (!columnId) continue
     const taskId = randomToken(16)
     await env.DB.prepare(
       `INSERT INTO tasks (
-        id, board_id, column_id, title, description, priority,
-        position, due_at, assignee_id, created_by, created_at, updated_at, deleted_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, NULL, NULL, ?, ?, ?, NULL)`,
+        id, board_id, column_id, title, description, priority, position,
+        due_at, assignee_id, created_by, created_at, updated_at, deleted_at,
+        recurring_rule, last_recurred_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, NULL, NULL, ?, ?, ?, NULL, 'none', NULL)`,
     )
       .bind(
         taskId,
@@ -67,7 +63,7 @@ export async function createProjectWithTemplate(
         task.title,
         task.description,
         task.priority,
-        index,
+        i,
         userId,
         now,
         now,
@@ -76,12 +72,10 @@ export async function createProjectWithTemplate(
     for (const tag of task.tags) {
       await env.DB.prepare(`INSERT INTO task_tags (task_id, tag) VALUES (?, ?)`).bind(
         taskId,
-        tag.slice(0, 40),
+        tag,
       ).run()
     }
   }
 
   return { projectId, boardId }
 }
-
-export type { TemplateId }

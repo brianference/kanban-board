@@ -1,9 +1,10 @@
-import { FormEvent, useEffect, useState } from 'react'
+import { FormEvent, useEffect, useRef, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Shell } from '../components/layout/Shell'
 import { Seo } from '../components/Seo'
 import { Breadcrumb } from '../components/layout/Breadcrumb'
 import { ConfirmDialog } from '../components/ConfirmDialog'
+import { AuthImage } from '../components/board/AuthImage'
 import { api, type Task } from '../lib/api'
 import { useToast } from '../hooks/useToast'
 
@@ -26,7 +27,9 @@ export function TaskDetailPage() {
   const [comment, setComment] = useState('')
   const [checkTitle, setCheckTitle] = useState('')
   const [busy, setBusy] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [confirmDel, setConfirmDel] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   async function load() {
     setError(null)
@@ -89,12 +92,27 @@ export function TaskDetailPage() {
 
   async function onUpload(files: FileList | null) {
     if (!files?.[0]) return
+    const file = files[0]
+    setUploading(true)
     try {
-      await api.uploadAttachment(taskId, files[0])
+      await api.uploadAttachment(taskId, file)
       push('Image attached', 'success')
       await load()
     } catch (err) {
       push(err instanceof Error ? err.message : 'Upload failed', 'error')
+    } finally {
+      setUploading(false)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    }
+  }
+
+  async function removeAttachment(id: string) {
+    try {
+      await api.deleteAttachment(id)
+      push('Image removed', 'success')
+      await load()
+    } catch (err) {
+      push(err instanceof Error ? err.message : 'Could not remove image', 'error')
     }
   }
 
@@ -213,20 +231,57 @@ export function TaskDetailPage() {
 
         <section className="card mt-6">
           <h2 className="font-display text-lg font-bold">Images</h2>
+          <p className="mt-1 text-sm text-[var(--text-muted)]">
+            PNG, JPEG, GIF, or WebP — max ~900KB each (large screenshots may need resizing).
+          </p>
           <div className="mt-4 flex flex-wrap gap-3">
             {(task.attachments || []).map((a) => (
-              <a key={a.id} href={a.url} target="_blank" rel="noreferrer" className="block overflow-hidden rounded-xl border">
-                <img src={a.url} alt={a.filename} className="h-24 w-24 object-cover" loading="lazy" width={96} height={96} />
-              </a>
+              <div key={a.id} className="group relative">
+                <a
+                  href={a.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block overflow-hidden rounded-xl border border-[var(--border)]"
+                  title={a.filename}
+                >
+                  <AuthImage
+                    src={a.url}
+                    alt={a.filename}
+                    className="h-24 w-24 object-cover"
+                    width={96}
+                    height={96}
+                  />
+                </a>
+                {canWrite ? (
+                  <button
+                    type="button"
+                    className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--surface)] text-xs font-bold text-[var(--danger)] shadow-soft"
+                    aria-label={`Remove ${a.filename}`}
+                    onClick={() => void removeAttachment(a.id)}
+                  >
+                    ×
+                  </button>
+                ) : null}
+              </div>
             ))}
+            {(task.attachments || []).length === 0 ? (
+              <p className="text-sm text-[var(--text-muted)]">No images yet.</p>
+            ) : null}
           </div>
           {canWrite ? (
-            <input
-              type="file"
-              accept="image/jpeg,image/png,image/gif,image/webp"
-              className="mt-4 block w-full text-sm"
-              onChange={(e) => void onUpload(e.target.files)}
-            />
+            <label className="mt-4 block">
+              <span className="btn inline-flex cursor-pointer">
+                {uploading ? 'Uploading…' : 'Choose image'}
+              </span>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/gif,image/webp,.png,.jpg,.jpeg,.gif,.webp"
+                className="sr-only"
+                disabled={uploading}
+                onChange={(e) => void onUpload(e.target.files)}
+              />
+            </label>
           ) : null}
         </section>
 

@@ -1,30 +1,43 @@
 import { Link, NavLink } from 'react-router-dom'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Logo } from './Logo'
+import { HeaderSearch } from './HeaderSearch'
 import { useAuth } from '../../hooks/useAuth'
+import { applyTheme, getInitialTheme, type Theme } from '../../lib/theme'
 
 const publicLinks = [
   { to: '/about', label: 'About' },
   { to: '/contact', label: 'Contact' },
-  { to: '/search', label: 'Search' },
 ]
 
 /**
- * Sticky premium header.
+ * Sticky app chrome — logo, global search, theme toggle, account.
  */
 export function Header() {
   const { user, logout, loading } = useAuth()
   const [open, setOpen] = useState(false)
+  const [theme, setTheme] = useState<Theme>('light')
+
+  useEffect(() => {
+    setTheme(getInitialTheme())
+  }, [])
+
+  function toggleTheme() {
+    const next: Theme = theme === 'dark' ? 'light' : 'dark'
+    applyTheme(next)
+    setTheme(next)
+  }
 
   const linkClass = ({ isActive }: { isActive: boolean }) =>
-    `rounded-lg px-3 py-2 text-sm font-semibold transition ${
-      isActive ? 'bg-brand-50 text-brand-700' : 'text-ink-700 hover:bg-white/80 hover:text-brand-700'
-    }`
+    `app-nav-link ${isActive ? 'app-nav-link--active' : ''}`
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/85 backdrop-blur-xl">
-      <div className="mx-auto flex min-h-[4.25rem] max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
+    <header className="app-header">
+      <div className="app-header-inner">
         <Logo />
+        <div className="app-header-search-wrap hidden md:block">
+          <HeaderSearch />
+        </div>
         <nav className="hidden items-center gap-1 md:flex" aria-label="Primary">
           {publicLinks.map((l) => (
             <NavLink key={l.to} to={l.to} className={linkClass}>
@@ -38,10 +51,21 @@ export function Header() {
           ) : null}
         </nav>
         <div className="hidden items-center gap-2 md:flex">
+          <button
+            type="button"
+            className="btn btn-icon"
+            onClick={toggleTheme}
+            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            title={theme === 'dark' ? 'Light mode' : 'Dark mode'}
+          >
+            {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
           {!loading && user ? (
             <>
-              <span className="max-w-[10rem] truncate text-sm text-ink-500">{user.name || user.email}</span>
-              <button type="button" className="btn btn-ghost" onClick={() => void logout()}>
+              <span className="hidden max-w-[9rem] truncate text-sm text-[var(--text-muted)] lg:inline">
+                {user.name || user.email}
+              </span>
+              <button type="button" className="btn btn-sm btn-ghost" onClick={() => void logout()}>
                 Sign out
               </button>
             </>
@@ -56,18 +80,31 @@ export function Header() {
             </>
           )}
         </div>
-        <button
-          type="button"
-          className="btn md:hidden"
-          aria-expanded={open}
-          aria-label="Open menu"
-          onClick={() => setOpen((v) => !v)}
-        >
-          ☰
-        </button>
+        <div className="flex items-center gap-2 md:hidden">
+          <button
+            type="button"
+            className="btn btn-icon"
+            onClick={toggleTheme}
+            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
+          <button
+            type="button"
+            className="btn"
+            aria-expanded={open}
+            aria-label="Open menu"
+            onClick={() => setOpen((v) => !v)}
+          >
+            ☰
+          </button>
+        </div>
       </div>
       {open ? (
-        <div className="border-t border-slate-200 bg-white px-4 py-4 md:hidden">
+        <div className="app-header-mobile">
+          <div className="mb-3">
+            <HeaderSearch />
+          </div>
           <nav className="flex flex-col gap-1" aria-label="Mobile">
             {publicLinks.map((l) => (
               <NavLink

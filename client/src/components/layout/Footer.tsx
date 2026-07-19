@@ -2,81 +2,61 @@ import { Link } from 'react-router-dom'
 import { Logo } from './Logo'
 
 /**
- * Organized professional footer.
+ * Footer aligned with header/body surface language (no harsh dark slab).
  */
 export function Footer() {
   const year = new Date().getFullYear()
   return (
-    <footer className="mt-auto border-t border-slate-200 bg-ink-950 text-slate-300">
-      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-4">
-        <div className="md:col-span-1 space-y-4">
-          <Logo to="/" light />
-          <p className="text-sm leading-relaxed text-slate-400">
+    <footer className="app-footer">
+      <div className="app-footer-inner">
+        <div className="space-y-3">
+          <Logo to="/" />
+          <p className="m-0 max-w-xs text-sm leading-relaxed text-[var(--text-muted)]">
             Modern project boards for people who want clarity — tasks, search, and secure accounts
             without the clutter.
           </p>
         </div>
         <div>
-          <h3 className="mb-4 font-display text-sm font-bold uppercase tracking-wider text-white">
-            Product
-          </h3>
-          <ul className="space-y-2.5 text-sm">
+          <h3>Product</h3>
+          <ul>
             <li>
-              <Link className="hover:text-white" to="/register">
-                Get started
-              </Link>
+              <Link to="/register">Get started</Link>
             </li>
             <li>
-              <Link className="hover:text-white" to="/search">
-                Search
-              </Link>
+              <Link to="/search">Search</Link>
             </li>
             <li>
-              <Link className="hover:text-white" to="/app">
-                Dashboard
-              </Link>
+              <Link to="/app">Dashboard</Link>
             </li>
           </ul>
         </div>
         <div>
-          <h3 className="mb-4 font-display text-sm font-bold uppercase tracking-wider text-white">
-            Company
-          </h3>
-          <ul className="space-y-2.5 text-sm">
+          <h3>Company</h3>
+          <ul>
             <li>
-              <Link className="hover:text-white" to="/about">
-                About us
-              </Link>
+              <Link to="/about">About us</Link>
             </li>
             <li>
-              <Link className="hover:text-white" to="/contact">
-                Contact
-              </Link>
+              <Link to="/contact">Contact</Link>
             </li>
           </ul>
         </div>
         <div>
-          <h3 className="mb-4 font-display text-sm font-bold uppercase tracking-wider text-white">
-            Legal
-          </h3>
-          <ul className="space-y-2.5 text-sm">
+          <h3>Legal</h3>
+          <ul>
             <li>
-              <Link className="hover:text-white" to="/privacy">
-                Privacy Policy
-              </Link>
+              <Link to="/privacy">Privacy Policy</Link>
             </li>
             <li>
-              <Link className="hover:text-white" to="/terms">
-                Terms &amp; Conditions
-              </Link>
+              <Link to="/terms">Terms &amp; Conditions</Link>
             </li>
           </ul>
         </div>
       </div>
-      <div className="border-t border-white/10">
-        <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-6 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-          <p>© {year} FlowBoard. All rights reserved.</p>
-          <p>Built for makers and teams.</p>
+      <div className="app-footer-base">
+        <div className="app-footer-base-inner">
+          <p className="m-0">© {year} FlowBoard. All rights reserved.</p>
+          <p className="m-0">Built for makers and teams.</p>
         </div>
       </div>
     </footer>

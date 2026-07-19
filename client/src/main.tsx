@@ -5,7 +5,10 @@ import { HelmetProvider } from 'react-helmet-async'
 import { App } from './App'
 import { AuthProvider } from './hooks/useAuth'
 import { ToastProvider } from './hooks/useToast'
+import { applyTheme, getInitialTheme } from './lib/theme'
 import './index.css'
+
+applyTheme(getInitialTheme())
 
 const root = document.getElementById('root')
 if (!root) throw new Error('Root missing')

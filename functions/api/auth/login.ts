@@ -1,8 +1,7 @@
-/** POST /api/auth/login — email + password. */
 import type { Env } from '../../_lib/types'
-import { assertSameOrigin, json, readJson, sessionCookie, SESSION_TTL_SECONDS } from '../../_lib/http'
-import { randomToken } from '../../_lib/crypto'
+import { assertSameOrigin, json, readJson, sessionCookie } from '../../_lib/http'
 import { rateLimit, verifyPassword } from '../../_lib/auth'
+import { signJwt, jwtSecret } from '../../_lib/crypto'
 
 interface Body {
   email?: string
@@ -14,7 +13,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   if (blocked) return blocked
 
   const ip = context.request.headers.get('CF-Connecting-IP') || 'unknown'
-  if (!rateLimit(`login:${ip}`, 20, 60_000)) {
+  if (!rateLimit(`login:${ip}`, 30, 60_000)) {
     return json({ error: 'Too many login attempts' }, 429)
   }
 
@@ -24,10 +23,6 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   }
 
   const email = body.email.trim().toLowerCase()
-  if (!rateLimit(`login-email:${email}`, 10, 60_000)) {
-    return json({ error: 'Too many login attempts for this account' }, 429)
-  }
-
   const user = await context.env.DB.prepare(
     `SELECT id, email, name, password_hash, password_salt FROM users WHERE email = ?`,
   )
@@ -40,25 +35,18 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       password_salt: string
     }>()
 
-  // Constant-ish failure path
-  if (!user) {
-    return json({ error: 'Invalid email or password' }, 401)
-  }
-
+  if (!user) return json({ error: 'Invalid email or password' }, 401)
   const ok = await verifyPassword(body.password, user.password_salt, user.password_hash)
   if (!ok) return json({ error: 'Invalid email or password' }, 401)
 
-  const now = Date.now()
-  const sessionId = randomToken(32)
-  await context.env.DB.prepare(
-    `INSERT INTO sessions (id, user_id, created_at, expires_at) VALUES (?, ?, ?, ?)`,
+  const token = await signJwt(
+    { sub: user.id, email: user.email, name: user.name },
+    jwtSecret(context.env),
   )
-    .bind(sessionId, user.id, now, now + SESSION_TTL_SECONDS * 1000)
-    .run()
 
   return json(
-    { ok: true, user: { id: user.id, email: user.email, name: user.name } },
+    { ok: true, user: { id: user.id, email: user.email, name: user.name }, token },
     200,
-    { 'Set-Cookie': sessionCookie(sessionId) },
+    { 'Set-Cookie': sessionCookie(token) },
   )
 }

@@ -1,5 +1,5 @@
 /**
- * API client for FlowBoard Express backend.
+ * API client for FlowBoard (Cloudflare Pages Functions + D1).
  */
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const headers = new Headers(init?.headers)
@@ -92,13 +92,26 @@ export const api = {
       body: JSON.stringify(body),
     }),
   uploadAttachment: (taskId: string, file: File) => {
+    const maxBytes = 900_000
+    if (file.size > maxBytes) {
+      return Promise.reject(
+        new Error(
+          `Image is too large (${Math.round(file.size / 1024)}KB). Max is ${Math.round(maxBytes / 1024)}KB — compress or resize first.`,
+        ),
+      )
+    }
+    if (file.size <= 0) {
+      return Promise.reject(new Error('Empty file'))
+    }
     const fd = new FormData()
-    fd.append('file', file)
+    fd.append('file', file, file.name || 'image.png')
     return request<{ ok: true; attachment: { id: string; url: string; filename: string } }>(
       `/api/tasks/${taskId}/attachments`,
       { method: 'POST', body: fd },
     )
   },
+  deleteAttachment: (attachmentId: string) =>
+    request<{ ok: true }>(`/api/attachments/${attachmentId}`, { method: 'DELETE', body: '{}' }),
   addComment: (taskId: string, body: string) =>
     request<{ ok: true }>(`/api/tasks/${taskId}/comments`, {
       method: 'POST',
