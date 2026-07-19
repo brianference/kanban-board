@@ -10,6 +10,12 @@ import type {
   TemplateId,
   User,
   TaskAttachment,
+  BoardFilters,
+  SavedView,
+  NotificationItem,
+  CommentItem,
+  ChecklistItem,
+  ActivityItem,
 } from '../types/models'
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
@@ -88,6 +94,7 @@ export const api = {
     dueAt?: number | null
     assigneeId?: string | null
     tags?: string[]
+    recurringRule?: string
   }) =>
     request<{ ok: true; taskId: string }>('/api/tasks', {
       method: 'POST',
@@ -138,4 +145,61 @@ export const api = {
 
   deleteAttachment: (attachmentId: string) =>
     request<{ ok: true }>(`/api/attachments/${attachmentId}`, { method: 'DELETE' }),
+
+  listComments: (taskId: string) =>
+    request<{ comments: CommentItem[] }>(`/api/tasks/${taskId}/comments`),
+
+  addComment: (taskId: string, body: string) =>
+    request<{ ok: true; comment: CommentItem }>(`/api/tasks/${taskId}/comments`, {
+      method: 'POST',
+      body: JSON.stringify({ body }),
+    }),
+
+  listChecklist: (taskId: string) =>
+    request<{ items: ChecklistItem[] }>(`/api/tasks/${taskId}/checklist`),
+
+  addChecklistItem: (taskId: string, title: string) =>
+    request<{ ok: true; item: ChecklistItem }>(`/api/tasks/${taskId}/checklist`, {
+      method: 'POST',
+      body: JSON.stringify({ title }),
+    }),
+
+  patchChecklistItem: (itemId: string, body: { title?: string; done?: boolean }) =>
+    request<{ ok: true }>(`/api/checklist/${itemId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(body),
+    }),
+
+  deleteChecklistItem: (itemId: string) =>
+    request<{ ok: true }>(`/api/checklist/${itemId}`, { method: 'DELETE' }),
+
+  listActivity: (taskId: string) =>
+    request<{ activity: ActivityItem[] }>(`/api/tasks/${taskId}/activity`),
+
+  listNotifications: () =>
+    request<{ notifications: NotificationItem[]; unread: number }>('/api/notifications'),
+
+  markNotificationsRead: (body: { id?: string; all?: boolean }) =>
+    request<{ ok: true }>('/api/notifications/read', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+
+  listViews: (projectId: string) =>
+    request<{ views: SavedView[] }>(`/api/projects/${projectId}/views`),
+
+  saveView: (projectId: string, name: string, filters: BoardFilters) =>
+    request<{ ok: true; view: SavedView }>(`/api/projects/${projectId}/views`, {
+      method: 'POST',
+      body: JSON.stringify({ name, filters }),
+    }),
+
+  deleteView: (viewId: string) =>
+    request<{ ok: true }>(`/api/views/${viewId}`, { method: 'DELETE' }),
+
+  updateColumn: (columnId: string, body: { name?: string; wipLimit?: number | null }) =>
+    request<{ ok: true; name: string; wipLimit: number | null }>(`/api/columns/${columnId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(body),
+    }),
 }

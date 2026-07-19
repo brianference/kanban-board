@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import { applyTheme, getInitialTheme, type Theme } from '../../lib/theme'
 import { useEffect, useState } from 'react'
+import { NotificationBell } from './NotificationBell'
 
 /**
  * Sticky app chrome with theme + account actions.
@@ -35,6 +36,7 @@ export function TopBar({ title = 'Kanban Board' }: { title?: string }) {
         </button>
         {user ? (
           <>
+            <NotificationBell />
             <span className="muted" style={{ fontSize: '0.85rem' }}>
               {user.name || user.email}
             </span>

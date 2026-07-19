@@ -136,7 +136,13 @@ export function ProjectBoardPage() {
         </div>
       ) : null}
       {board ? (
-        <BoardView data={board} members={members} canWrite={canWrite} onReload={load} />
+        <BoardView
+          data={board}
+          members={members}
+          canWrite={canWrite}
+          projectId={projectId}
+          onReload={load}
+        />
       ) : null}
       <BottomNav projectId={projectId} />
     </div>

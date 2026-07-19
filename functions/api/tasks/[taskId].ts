@@ -3,8 +3,10 @@ import type { Env } from '../../_lib/types'
 import { assertSameOrigin, json, readJson } from '../../_lib/http'
 import { requireSession } from '../../_lib/auth'
 import { getTaskAccess } from '../../_lib/tenancy'
+import { logActivity, notifyUser } from '../../_lib/activity'
 
 const PRIORITIES = new Set(['critical', 'high', 'medium', 'low'])
+const RECUR = new Set(['none', 'daily', 'weekly', 'monthly'])
 
 interface PatchBody {
   title?: string
@@ -15,6 +17,7 @@ interface PatchBody {
   tags?: string[]
   columnId?: string
   position?: number
+  recurringRule?: string
 }
 
 export const onRequestPatch: PagesFunction<Env> = async (context) => {
@@ -32,7 +35,8 @@ export const onRequestPatch: PagesFunction<Env> = async (context) => {
   if (!body) return json({ error: 'Invalid body' }, 400)
 
   const current = await context.env.DB.prepare(
-    `SELECT title, description, priority, due_at, assignee_id, column_id, position
+    `SELECT title, description, priority, due_at, assignee_id, column_id, position,
+            recurring_rule AS recurringRule
        FROM tasks WHERE id = ? AND deleted_at IS NULL`,
   )
     .bind(taskId)
@@ -44,6 +48,7 @@ export const onRequestPatch: PagesFunction<Env> = async (context) => {
       assignee_id: string | null
       column_id: string
       position: number
+      recurringRule: string | null
     }>()
   if (!current) return json({ error: 'Not found' }, 404)
 
@@ -59,6 +64,10 @@ export const onRequestPatch: PagesFunction<Env> = async (context) => {
     body.priority && PRIORITIES.has(body.priority) ? body.priority : current.priority
   const dueAt = body.dueAt !== undefined ? body.dueAt : current.due_at
   const assigneeId = body.assigneeId !== undefined ? body.assigneeId : current.assignee_id
+  const recurringRule =
+    body.recurringRule && RECUR.has(body.recurringRule)
+      ? body.recurringRule
+      : current.recurringRule || 'none'
 
   let columnId = current.column_id
   let position = current.position
@@ -78,10 +87,21 @@ export const onRequestPatch: PagesFunction<Env> = async (context) => {
   const now = Date.now()
   await context.env.DB.prepare(
     `UPDATE tasks SET title = ?, description = ?, priority = ?, due_at = ?,
-      assignee_id = ?, column_id = ?, position = ?, updated_at = ?
+      assignee_id = ?, column_id = ?, position = ?, recurring_rule = ?, updated_at = ?
      WHERE id = ?`,
   )
-    .bind(title, description, priority, dueAt, assigneeId, columnId, position, now, taskId)
+    .bind(
+      title,
+      description,
+      priority,
+      dueAt,
+      assigneeId,
+      columnId,
+      position,
+      recurringRule,
+      now,
+      taskId,
+    )
     .run()
 
   if (body.tags) {
@@ -97,6 +117,24 @@ export const onRequestPatch: PagesFunction<Env> = async (context) => {
         ),
       )
     }
+  }
+
+  await logActivity(context.env, taskId, session.userId, 'update', `Updated “${title}”`)
+
+  if (
+    body.assigneeId !== undefined &&
+    body.assigneeId &&
+    body.assigneeId !== current.assignee_id &&
+    body.assigneeId !== session.userId
+  ) {
+    await notifyUser(
+      context.env,
+      body.assigneeId,
+      'assign',
+      `Assigned: ${title}`,
+      `${session.name || session.email} assigned you a task`,
+      `/app/projects/${access.projectId}?task=${taskId}`,
+    )
   }
 
   await context.env.DB.prepare(`UPDATE projects SET updated_at = ? WHERE id = ?`)
@@ -124,5 +162,6 @@ export const onRequestDelete: PagesFunction<Env> = async (context) => {
     .bind(now, now, taskId)
     .run()
 
+  await logActivity(context.env, taskId, session.userId, 'delete', 'Task deleted')
   return json({ ok: true })
 }

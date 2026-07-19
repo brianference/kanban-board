@@ -94,6 +94,21 @@ export function TaskCard({
               📎 {task.attachments!.length}
             </span>
           ) : null}
+          {(task.checklistTotal ?? 0) > 0 ? (
+            <span className="chip" title="Checklist">
+              ☑ {task.checklistDone}/{task.checklistTotal}
+            </span>
+          ) : null}
+          {(task.commentCount ?? 0) > 0 ? (
+            <span className="chip" title="Comments">
+              💬 {task.commentCount}
+            </span>
+          ) : null}
+          {task.recurringRule && task.recurringRule !== 'none' ? (
+            <span className="chip" title="Recurring">
+              🔁 {task.recurringRule}
+            </span>
+          ) : null}
           {task.tags.map((tag) => (
             <span key={tag} className="chip">
               #{tag}

@@ -16,6 +16,7 @@ interface Body {
   dueAt?: number | null
   assigneeId?: string | null
   tags?: string[]
+  recurringRule?: string
 }
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
@@ -57,11 +58,17 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   const dueAt = typeof body.dueAt === 'number' ? body.dueAt : null
   const assigneeId = body.assigneeId || null
 
+  const recurring =
+    body.recurringRule && ['none', 'daily', 'weekly', 'monthly'].includes(body.recurringRule)
+      ? body.recurringRule
+      : 'none'
+
   await context.env.DB.prepare(
     `INSERT INTO tasks (
       id, board_id, column_id, title, description, priority, position,
-      due_at, assignee_id, created_by, created_at, updated_at, deleted_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)`,
+      due_at, assignee_id, created_by, created_at, updated_at, deleted_at,
+      recurring_rule, last_recurred_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, NULL)`,
   )
     .bind(
       id,
@@ -76,6 +83,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       session.userId,
       now,
       now,
+      recurring,
     )
     .run()
 

@@ -3,6 +3,15 @@
 export type Priority = 'critical' | 'high' | 'medium' | 'low'
 export type MemberRole = 'owner' | 'member' | 'viewer'
 export type TemplateId = 'blank' | 'personal' | 'side-project' | 'bugs'
+export type RecurringRule = 'none' | 'daily' | 'weekly' | 'monthly'
+export type SwimlaneMode = 'none' | 'assignee' | 'priority' | 'tag'
+export type DueFilter =
+  | 'all'
+  | 'overdue'
+  | 'today'
+  | 'week'
+  | 'none'
+  | 'has-due'
 
 export interface User {
   id: string
@@ -31,6 +40,7 @@ export interface Column {
   key: string
   name: string
   position: number
+  wipLimit?: number | null
 }
 
 export interface TaskAttachment {
@@ -59,6 +69,10 @@ export interface Task {
   updatedAt: number
   tags: string[]
   attachments?: TaskAttachment[]
+  checklistTotal?: number
+  checklistDone?: number
+  commentCount?: number
+  recurringRule?: RecurringRule | string
 }
 
 export interface BoardPayload {
@@ -80,4 +94,75 @@ export interface ProjectMember {
   role: MemberRole
   email: string
   name: string
+}
+
+export interface BoardFilters {
+  search: string
+  assigneeId: string
+  priority: string
+  tag: string
+  due: DueFilter
+  hasAttachments: boolean
+  hasOpenChecklist: boolean
+  unassignedOnly: boolean
+  mentionedOnly: boolean
+}
+
+export interface SavedView {
+  id: string
+  name: string
+  filters: BoardFilters
+  createdAt: number
+}
+
+export interface NotificationItem {
+  id: string
+  kind: string
+  title: string
+  body: string
+  link: string
+  readAt: number | null
+  createdAt: number
+}
+
+export interface CommentItem {
+  id: string
+  taskId: string
+  userId: string
+  body: string
+  createdAt: number
+  userName?: string
+  userEmail?: string
+}
+
+export interface ChecklistItem {
+  id: string
+  taskId: string
+  title: string
+  done: boolean
+  position: number
+  createdAt: number
+}
+
+export interface ActivityItem {
+  id: string
+  kind: string
+  message: string
+  createdAt: number
+  userName?: string | null
+  userEmail?: string | null
+}
+
+export function defaultFilters(): BoardFilters {
+  return {
+    search: '',
+    assigneeId: '',
+    priority: '',
+    tag: '',
+    due: 'all',
+    hasAttachments: false,
+    hasOpenChecklist: false,
+    unassignedOnly: false,
+    mentionedOnly: false,
+  }
 }
