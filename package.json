@@ -1,36 +1,18 @@
 {
-  "name": "kanban-board",
+  "name": "flowboard",
+  "version": "3.0.0",
   "private": true,
-  "version": "2.0.0",
-  "type": "module",
+  "description": "FlowBoard full-stack kanban — Vite React Tailwind + Express SQLite JWT",
   "scripts": {
-    "dev": "vite",
-    "typecheck": "tsc --noEmit",
-    "build": "tsc --noEmit && vite build",
-    "preview": "vite preview",
-    "test:unit": "node --experimental-strip-types scripts/test-unit.mjs",
-    "test:integration": "node --experimental-strip-types scripts/test-integration.mjs",
-    "test:security": "node --experimental-strip-types scripts/test-security.mjs",
-    "test:api": "node --experimental-strip-types scripts/test-api-contracts.mjs",
-    "test:sim": "node --experimental-strip-types scripts/test-simulations.mjs",
-    "test:pass1": "npm run typecheck && npm run test:unit && npm run test:security && npm run test:api && npm run test:sim && npm run test:integration",
-    "test:pass2": "npm run test:pass1",
-    "test:all": "npm run build && npm run test:pass1"
+    "install:all": "npm install --prefix server && npm install --prefix client",
+    "dev:server": "npm run dev --prefix server",
+    "dev:client": "npm run dev --prefix client",
+    "build": "npm run build --prefix client",
+    "start": "npm run start --prefix server",
+    "test:sim": "node scripts/sim-fullstack.mjs",
+    "release:notes": "node -e \"console.log('See docs/releases/v3.0.0.md')\""
   },
-  "dependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-router-dom": "^6.28.0",
-    "zod": "^3.23.8"
-  },
-  "devDependencies": {
-    "@cloudflare/workers-types": "^5.20260714.1",
-    "@types/react": "^18.3.12",
-    "@types/react-dom": "^18.3.1",
-    "@vitejs/plugin-react": "^4.3.4",
-    "playwright": "^1.49.0",
-    "typescript": "^5.6.3",
-    "vite": "^5.4.11",
-    "wrangler": "^4.112.0"
+  "engines": {
+    "node": ">=20"
   }
 }

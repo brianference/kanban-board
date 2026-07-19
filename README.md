@@ -1,55 +1,63 @@
-# Kanban Board (multi-user platform)
+# FlowBoard v3 — Full-stack project kanban
 
-Cloud-backed project tracker: **accounts, projects, boards, tasks** on **Cloudflare D1**.
+Modern full-stack kanban app.
 
-- Live: https://kanban-board-public.pages.dev  
-- Source: https://github.com/brianference/kanban-board  
-- Mobile mockups: `/mockups/mobile-variations.html`
+| Layer | Technology |
+|-------|------------|
+| Frontend | Vite · React · TypeScript · Tailwind CSS · React Router |
+| Backend | Node.js · Express |
+| Database | SQLite (`better-sqlite3`) |
+| Auth | JWT (httpOnly cookie) + bcrypt |
 
-## Stack
-
-- React + TypeScript + Vite (modular UI, not a monolith)
-- Cloudflare Pages Functions API
-- D1 (SQLite) with versioned migrations
-- Email + password auth (PBKDF2), httpOnly sessions
-
-## Local dev
+## Quick start
 
 ```bash
-npm install
-npm run build
-npx wrangler d1 migrations apply kanban-board-db --local
-npx wrangler pages dev dist --d1=DB=kanban-board-db
+# Install
+npm run install:all
+
+# Terminal 1 — API
+cd server
+cp .env.example .env   # set JWT_SECRET
+npm run dev
+
+# Terminal 2 — UI (proxies /api → :8787)
+cd client
+npm run dev
 ```
 
-## Scripts
+Open http://localhost:5173
 
-| Command | Purpose |
-|---------|---------|
-| `npm run build` | Typecheck + production bundle |
-| `npm run test:unit` | Unit tests |
-| `npm run test:security` | Security / tenancy tests |
-| `npm run test:api` | API contract tests |
-| `npm run test:integration` | Multi-step flows |
-| `npm run test:sim` | 20 journey simulations |
-| `npm run test:pass1` | Full automated pass |
+## Production
 
-## Architecture
-
-```
-src/                 UI routes & components
-functions/api/       HTTP handlers
-functions/_lib/      auth, crypto, tenancy, templates
-migrations/          D1 schema
-mockups/             3 mobile-first design variations
-legacy/              Previous single-file board (archive)
+```bash
+cd client && npm run build
+cd ../server
+NODE_ENV=production JWT_SECRET=... PORT=8787 npm start
 ```
 
-## Auth
+Express serves `client/dist` and `/api/*`.
 
-1. `POST /api/auth/register` `{ email, password, name }`  
-2. `POST /api/auth/login` `{ email, password }`  
-3. Cookie `kb_session` (HttpOnly)  
-4. `GET /api/auth/session`
+## Critical production notes
 
-No email provider required for v1.
+1. **`JWT_SECRET`** — long random string (32+ chars). Never commit real secrets.
+2. **Persist volumes** — mount `server/data/` (SQLite) and `server/uploads/` (images).
+3. **HTTPS** — required for secure cookies in production.
+4. **`CLIENT_ORIGIN`** — set if UI is on another origin (CORS + cookies).
+5. **Backups** — copy `server/data/flowboard.db` regularly.
+
+## Pages
+
+- `/` Home · `/about` · `/contact` · `/privacy` · `/terms`
+- `/login` · `/register`
+- `/app` Dashboard · `/app/projects/:id` Board · `/app/tasks/:id` Detail · `/search`
+
+## Tests
+
+```bash
+# With server running on :8787
+node scripts/sim-fullstack.mjs
+```
+
+## Release notes
+
+See [docs/releases/v3.0.0.md](docs/releases/v3.0.0.md).

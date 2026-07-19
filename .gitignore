@@ -1,31 +1,14 @@
-# Secrets
-*.env
-keys.env
-.env
-.dev.vars
-
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-venv/
-ENV/
-env/
-
-# Node
 node_modules/
-dist/
+client/node_modules/
+server/node_modules/
+client/dist/
+server/data/
+server/uploads/
+server/.env
+.env
+.env.*
+!.env.example
 .wrangler/
-
-# IDE
-.vscode/
-.idea/
-
-# Backups
-*.backup
-*.bak
-
-# Logs
+dist/
 *.log
+.DS_Store
