@@ -2,7 +2,7 @@
 
 **Multi-user project kanban that ships to the edge** — accounts, drag-and-drop boards, search, images, and comments — live on Cloudflare Pages + D1.
 
-**[Open live demo →](https://kanban-board-public.pages.dev)** · [Release notes v5.0.0](docs/releases/v5.0.0.md)
+**[Open live demo →](https://kanban-board-public.pages.dev)** · [Release notes v6.0.0](docs/releases/v6.0.0.md)
 
 ---
 
