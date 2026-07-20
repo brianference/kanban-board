@@ -59,13 +59,8 @@ export const api = {
     request<{
       task: Task
       checklist: Array<{ id: string; title: string; done: boolean }>
-      comments: Array<{
-        id: string
-        body: string
-        createdAt: number
-        userName?: string
-        userEmail?: string
-      }>
+      comments: Comment[]
+      members: Array<{ userId: string; email: string; name: string; role: string }>
       role: string
     }>(`/api/tasks/${id}`),
   createTask: (body: Record<string, unknown>) =>
@@ -91,32 +86,47 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(body),
     }),
-  uploadAttachment: (taskId: string, file: File) => {
-    const maxBytes = 900_000
-    if (file.size > maxBytes) {
-      return Promise.reject(
-        new Error(
-          `Image is too large (${Math.round(file.size / 1024)}KB). Max is ${Math.round(maxBytes / 1024)}KB — compress or resize first.`,
-        ),
-      )
-    }
-    if (file.size <= 0) {
-      return Promise.reject(new Error('Empty file'))
-    }
+  /**
+   * Upload task image. Large files are auto-resized/compressed in the browser first.
+   */
+  uploadAttachment: async (taskId: string, file: File) => {
+    const { prepareImageForUpload } = await import('./imageCompress')
+    const prepared = await prepareImageForUpload(file)
     const fd = new FormData()
-    fd.append('file', file, file.name || 'image.png')
-    return request<{ ok: true; attachment: { id: string; url: string; filename: string } }>(
-      `/api/tasks/${taskId}/attachments`,
-      { method: 'POST', body: fd },
-    )
+    fd.append('file', prepared.file, prepared.file.name || 'image.jpg')
+    const result = await request<{
+      ok: true
+      attachment: { id: string; url: string; filename: string }
+    }>(`/api/tasks/${taskId}/attachments`, { method: 'POST', body: fd })
+    return { ...result, optimized: prepared.optimized, originalBytes: prepared.originalBytes, finalBytes: prepared.finalBytes }
   },
   deleteAttachment: (attachmentId: string) =>
     request<{ ok: true }>(`/api/attachments/${attachmentId}`, { method: 'DELETE', body: '{}' }),
-  addComment: (taskId: string, body: string) =>
-    request<{ ok: true }>(`/api/tasks/${taskId}/comments`, {
+  /**
+   * Post a comment with optional images. Mentions use @name or @email.
+   */
+  addComment: async (taskId: string, body: string, images: File[] = []) => {
+    if (images.length === 0) {
+      return request<{
+        ok: true
+        comment: Comment
+      }>(`/api/tasks/${taskId}/comments`, {
+        method: 'POST',
+        body: JSON.stringify({ body }),
+      })
+    }
+    const { prepareImageForUpload } = await import('./imageCompress')
+    const fd = new FormData()
+    fd.append('body', body || '')
+    for (const raw of images.slice(0, 4)) {
+      const prepared = await prepareImageForUpload(raw)
+      fd.append('file', prepared.file, prepared.file.name || 'image.jpg')
+    }
+    return request<{ ok: true; comment: Comment }>(`/api/tasks/${taskId}/comments`, {
       method: 'POST',
-      body: JSON.stringify({ body }),
-    }),
+      body: fd,
+    })
+  },
   addChecklist: (taskId: string, title: string) =>
     request<{ ok: true; item: { id: string; title: string; done: boolean } }>(
       `/api/tasks/${taskId}/checklist`,
@@ -169,4 +179,21 @@ export type SearchResult = Task & {
   projectName: string
   boardName: string
   columnName: string
+}
+
+export type CommentAttachment = {
+  id: string
+  filename: string
+  url: string
+  contentType?: string
+}
+
+export type Comment = {
+  id: string
+  body: string
+  createdAt: number
+  userName?: string
+  userEmail?: string
+  attachments?: CommentAttachment[]
+  mentions?: string[]
 }

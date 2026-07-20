@@ -41,8 +41,10 @@ export function DashboardPage() {
     e.preventDefault()
     setBusy(true)
     try {
-      const res = await api.createProject({ name, template })
+      const res = await api.createProject({ name: name.trim(), template })
       push('Project created', 'success')
+      setName('')
+      // Open the new board immediately (don't leave user on dashboard form)
       nav(`/app/projects/${res.projectId}`)
     } catch (err) {
       push(err instanceof Error ? err.message : 'Create failed', 'error')

@@ -69,11 +69,33 @@ export function SearchPage() {
         noIndex={!user}
       />
       <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
-        <Breadcrumb items={[{ label: 'Home', to: '/' }, { label: 'Search' }]} />
-        <h1 className="font-display text-3xl font-bold tracking-tight">Search tasks</h1>
-        <p className="mt-2 text-ink-500">
-          Search by title, description, tags, priority, and due date.
-        </p>
+        <Breadcrumb
+          items={[
+            { label: 'Home', to: '/' },
+            { label: 'Dashboard', to: user ? '/app' : undefined },
+            { label: 'Search' },
+          ]}
+        />
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h1 className="font-display text-3xl font-bold tracking-tight">Search tasks</h1>
+            <p className="mt-2 text-ink-500">
+              Search by title, description, tags, priority, and due date.
+            </p>
+          </div>
+          {user ? (
+            <div className="flex flex-wrap gap-2">
+              {projectId ? (
+                <Link to={`/app/projects/${projectId}`} className="btn btn-sm">
+                  ← Back to board
+                </Link>
+              ) : null}
+              <Link to="/app" className="btn btn-sm">
+                Dashboard
+              </Link>
+            </div>
+          ) : null}
+        </div>
 
         {!user ? (
           <div className="card mt-8">

@@ -2,16 +2,16 @@ import { Link } from 'react-router-dom'
 import { Logo } from './Logo'
 
 /**
- * Footer aligned with header/body surface language (no harsh dark slab).
+ * Dark footer (product chrome contrast under light board).
  */
 export function Footer() {
   const year = new Date().getFullYear()
   return (
-    <footer className="app-footer">
+    <footer className="app-footer app-footer--dark">
       <div className="app-footer-inner">
         <div className="space-y-3">
-          <Logo to="/" />
-          <p className="m-0 max-w-xs text-sm leading-relaxed text-[var(--text-muted)]">
+          <Logo to="/" light />
+          <p className="m-0 max-w-xs text-sm leading-relaxed text-slate-400">
             Modern project boards for people who want clarity — tasks, search, and secure accounts
             without the clutter.
           </p>

@@ -300,15 +300,20 @@
 }
 .app-footer {
   margin-top: auto;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid transparent;
   background: var(--surface);
   color: var(--text-muted);
+}
+.app-footer--dark {
+  background: #071018;
+  color: #94a3b8;
+  border-top: 1px solid #1a2736;
 }
 .app-footer-inner {
   margin: 0 auto;
   max-width: var(--page-max);
   width: 100%;
-  padding: 2.5rem var(--page-pad) 1.25rem;
+  padding: 2.75rem var(--page-pad) 1.5rem;
   display: grid;
   gap: 2rem;
 }
@@ -327,14 +332,20 @@
   color: var(--text);
   font-family: var(--font-body);
 }
+.app-footer--dark h3 {
+  color: #f8fafc;
+}
 .app-footer a {
-  color: var(--text-muted);
+  color: inherit;
   text-decoration: none;
   font-size: 0.875rem;
 }
 .app-footer a:hover {
   color: var(--accent);
   text-decoration: none;
+}
+.app-footer--dark a:hover {
+  color: #7dd3fc;
 }
 .app-footer ul {
   list-style: none;
@@ -348,16 +359,22 @@
   border-top: 1px solid var(--border);
   margin-top: 0.5rem;
 }
+.app-footer--dark .app-footer-base {
+  border-top-color: rgba(255, 255, 255, 0.08);
+}
 .app-footer-base-inner {
   margin: 0 auto;
   max-width: var(--page-max);
-  padding: 0.85rem var(--page-pad);
+  padding: 0.9rem var(--page-pad);
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem 1.5rem;
   justify-content: space-between;
   font-size: 0.75rem;
-  color: var(--text-muted);
+  color: inherit;
+}
+.app-footer--dark .app-footer-base-inner {
+  color: #64748b;
 }
 
 /* ── Header search ── */
@@ -513,6 +530,21 @@
   padding: 0.85rem 1.25rem;
   border-bottom: 1px solid var(--border);
   background: var(--surface);
+}
+.board-quick-add {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  padding: 0.65rem 1.25rem 0.85rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  align-items: center;
+}
+.board-quick-add .input {
+  flex: 1 1 12rem;
+  min-height: 2.25rem;
+  max-width: 28rem;
+  background: var(--surface-2);
 }
 .board-filters .input {
   min-height: 2.25rem;
@@ -948,4 +980,24 @@
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+/* Comment @mentions and #tags */
+.comment-mention {
+  display: inline;
+  font-weight: 700;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border-radius: 4px;
+  padding: 0 3px;
+}
+.comment-tag {
+  display: inline;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0 6px;
+  font-size: 0.85em;
 }

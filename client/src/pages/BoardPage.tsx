@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useMemo, useState, type DragEvent } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type DragEvent,
+  type FormEvent,
+} from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { Shell } from '../components/layout/Shell'
 import { Seo } from '../components/Seo'
@@ -23,6 +30,8 @@ export function BoardPage() {
   const [dragId, setDragId] = useState<string | null>(null)
   const [overColumnId, setOverColumnId] = useState<string | null>(null)
   const [mobileColId, setMobileColId] = useState<string | null>(null)
+  const [newTitle, setNewTitle] = useState('')
+  const [creating, setCreating] = useState(false)
 
   const load = useCallback(async () => {
     setError(null)
@@ -75,16 +84,54 @@ export function BoardPage() {
     setOverColumnId(null)
     const taskId = e.dataTransfer.getData('text/plain') || dragId
     if (!taskId || !payload) return
+    // No-op drop on same column last position still reloads — skip if unchanged
+    const current = payload.tasks.find((t) => t.id === taskId)
+    if (current?.columnId === columnId) {
+      setDragId(null)
+      return
+    }
     const list = (byCol.get(columnId) || []).filter((t) => t.id !== taskId)
     const position = list.length ? list[list.length - 1]!.position + 1 : 0
     try {
       await api.moveTask(taskId, columnId, position)
-      push('Board saved', 'success')
+      push('Card moved', 'success')
       await load()
     } catch (err) {
       push(err instanceof Error ? err.message : 'Move failed', 'error')
     } finally {
       setDragId(null)
+    }
+  }
+
+  async function createTask(e: FormEvent) {
+    e.preventDefault()
+    if (!payload || payload.role === 'viewer') return
+    const title = newTitle.trim()
+    if (!title) {
+      push('Enter a task title', 'error')
+      return
+    }
+    const colId = mobileColId || payload.columns[0]?.id
+    if (!colId) {
+      push('No column available', 'error')
+      return
+    }
+    setCreating(true)
+    try {
+      await api.createTask({
+        boardId: payload.board.id,
+        columnId: colId,
+        title,
+        priority: 'medium',
+        description: '',
+      })
+      setNewTitle('')
+      push('Task added', 'success')
+      await load()
+    } catch (err) {
+      push(err instanceof Error ? err.message : 'Could not create task', 'error')
+    } finally {
+      setCreating(false)
     }
   }
 
@@ -148,6 +195,26 @@ export function BoardPage() {
               <option value="low">Low</option>
             </select>
           </div>
+
+          {canWrite && payload ? (
+            <form className="board-quick-add" onSubmit={(e) => void createTask(e)}>
+              <label className="sr-only" htmlFor="quick-task">
+                New task title
+              </label>
+              <input
+                id="quick-task"
+                className="input"
+                placeholder="Add a task… (Enter to create)"
+                value={newTitle}
+                onChange={(e) => setNewTitle(e.target.value)}
+                maxLength={200}
+                disabled={creating}
+              />
+              <button type="submit" className="btn btn-primary btn-sm" disabled={creating}>
+                {creating ? 'Adding…' : 'Add task'}
+              </button>
+            </form>
+          ) : null}
 
           {error ? (
             <p className="px-5 py-4 font-medium text-red-600">{error}</p>

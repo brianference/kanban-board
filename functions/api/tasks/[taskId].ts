@@ -79,8 +79,70 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         WHERE c.task_id = ? ORDER BY c.created_at`,
     )
       .bind(taskId)
-      .all()
-    comments = results ?? []
+      .all<{
+        id: string
+        body: string
+        createdAt: number
+        userName: string
+        userEmail: string
+      }>()
+
+    const commentIds = (results ?? []).map((c) => c.id)
+    const attByComment = new Map<
+      string,
+      Array<{ id: string; filename: string; url: string; contentType?: string }>
+    >()
+
+    if (commentIds.length) {
+      try {
+        const ph = commentIds.map(() => '?').join(',')
+        const { results: attRows } = await context.env.DB.prepare(
+          `SELECT id, comment_id AS commentId, filename, content_type AS contentType
+             FROM comment_attachments WHERE comment_id IN (${ph}) ORDER BY created_at`,
+        )
+          .bind(...commentIds)
+          .all<{
+            id: string
+            commentId: string
+            filename: string
+            contentType: string
+          }>()
+        for (const row of attRows ?? []) {
+          const list = attByComment.get(row.commentId) || []
+          list.push({
+            id: row.id,
+            filename: row.filename,
+            contentType: row.contentType,
+            url: `/api/comment-attachments/${row.id}`,
+          })
+          attByComment.set(row.commentId, list)
+        }
+      } catch {
+        /* table may not exist yet */
+      }
+    }
+
+    comments = (results ?? []).map((c) => ({
+      ...c,
+      attachments: attByComment.get(c.id) || [],
+    }))
+  } catch {
+    /* */
+  }
+
+  // Project members for @mention autocomplete
+  let members: Array<{ userId: string; email: string; name: string; role: string }> = []
+  try {
+    const { results: memberRows } = await context.env.DB.prepare(
+      `SELECT m.user_id AS userId, m.role AS role, u.email AS email, u.name AS name
+         FROM project_members m
+         JOIN users u ON u.id = m.user_id
+        WHERE m.project_id = ?
+        ORDER BY u.name COLLATE NOCASE`,
+    )
+      .bind(access.projectId)
+      .all<{ userId: string; role: string; email: string; name: string }>()
+    members = memberRows ?? []
   } catch {
     /* */
   }
@@ -93,6 +155,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     },
     checklist,
     comments,
+    members,
     role: access.role,
   })
 }

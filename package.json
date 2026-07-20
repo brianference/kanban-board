@@ -1,6 +1,6 @@
 {
   "name": "flowboard",
-  "version": "4.0.0",
+  "version": "5.0.0",
   "private": true,
   "description": "FlowBoard multi-user kanban — Cloudflare Pages Functions + D1 + Vite React",
   "scripts": {
@@ -17,7 +17,7 @@
     "test:users": "node scripts/test-100-users.mjs",
     "test:all": "node scripts/test-all-suites.mjs",
     "test:campaign": "node scripts/test-all-suites.mjs",
-    "release:notes": "node -e \"console.log('See docs/releases/v4.0.0.md')\""
+    "release:notes": "node -e \"console.log('See docs/releases/v5.0.0.md')\""
   },
   "engines": {
     "node": ">=20"

@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FlowBoard — 8 designs of the project board screen</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0 }
+  body {
+    background: #070a10;
+    color: #e8eef9;
+    font-family: Inter, system-ui, sans-serif;
+    padding: 1.75rem 1rem 4rem;
+  }
+  .wrap { max-width: 1760px; margin: 0 auto }
+  h1 { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 0.35rem }
+  .lede { color: #8b9bb0; font-size: 0.88rem; line-height: 1.55; max-width: 900px; margin-bottom: 0.65rem }
+  .target {
+    display: flex; flex-wrap: wrap; gap: 0.75rem 1.25rem; align-items: center;
+    margin-bottom: 1.25rem; padding: 0.75rem 1rem; border-radius: 12px;
+    background: #101826; border: 1px solid #243044; font-size: 0.8rem; color: #94a3b8;
+  }
+  .target b { color: #7dd3fc }
+  .target code { background: #1a2436; padding: 0.15rem 0.4rem; border-radius: 4px; color: #cbd5e1; font-size: 0.75rem }
+  .team { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 1.5rem }
+  .chip {
+    font-size: 0.65rem; font-weight: 600; padding: 0.28rem 0.55rem; border-radius: 999px;
+    background: #141b28; border: 1px solid #243044; color: #a8b8cc;
+  }
+  .chip b { color: #7dd3fc }
+  .section-label {
+    font-family: JetBrains Mono, monospace; font-size: 0.62rem; letter-spacing: 0.12em;
+    text-transform: uppercase; color: #5a6a80; margin: 1.35rem 0 0.75rem;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 1.35rem;
+    align-items: start;
+  }
+  .card {
+    background: #0e1420;
+    border: 1px solid #1e2a3c;
+    border-radius: 16px;
+    padding: 0.85rem 0.75rem 1rem;
+    display: flex; flex-direction: column; gap: 0.4rem;
+  }
+  .card.prior { border-color: #2a3a28 }
+  .card.proposal { border-color: #2a3558 }
+  .card.current { border-color: #0e7490; box-shadow: 0 0 0 1px rgba(14,116,144,.35) }
+  .num { font-family: JetBrains Mono, monospace; font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: #6b7c94 }
+  .name { font-size: 0.98rem; font-weight: 700; color: #f1f5f9 }
+  .meta { font-size: 0.72rem; color: #6b7c94; line-height: 1.4; min-height: 2.4rem }
+  .persona { font-size: 0.68rem; color: #94a3b8; font-style: italic; border-top: 1px solid #1a2434; padding-top: 0.45rem; margin-top: 0.2rem }
+  .swatches { display: flex; gap: 4px; margin: 0.1rem 0 0.25rem }
+  .sw { width: 13px; height: 13px; border-radius: 3px; border: 1px solid rgba(255,255,255,.12) }
+
+  /* Desktop-ish board frame (matches maker.png proportions) */
+  .frame {
+    width: 100%;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid #1e2a3c;
+    background: #0b1220;
+    font-size: 9px;
+    line-height: 1.25;
+  }
+  .chrome {
+    display: flex; align-items: center; gap: 6px;
+    padding: 6px 8px; font-size: 8px; color: #8b9bb0;
+    background: #1a2332; border-bottom: 1px solid #243044;
+  }
+  .chrome .dot { width: 7px; height: 7px; border-radius: 50% }
+  .chrome .d1 { background: #f87171 } .chrome .d2 { background: #fbbf24 } .chrome .d3 { background: #4ade80 }
+  .chrome .url { flex: 1; background: #0f172a; border-radius: 4px; padding: 3px 6px; color: #64748b; overflow: hidden; white-space: nowrap }
+
+  .board {
+    min-height: 280px;
+    display: flex; flex-direction: column;
+  }
+  .topbar {
+    display: flex; align-items: center; gap: 8px; padding: 8px 10px;
+    border-bottom: 1px solid transparent; flex-shrink: 0;
+  }
+  .logo { display: flex; align-items: center; gap: 4px; font-weight: 700; font-size: 10px }
+  .logo i { width: 16px; height: 16px; border-radius: 4px; background: linear-gradient(135deg,#0284c7,#38bdf8) }
+  .search {
+    flex: 1; max-width: 120px; height: 20px; border-radius: 999px;
+    display: flex; align-items: center; padding: 0 8px; font-size: 8px; opacity: .85;
+    border: 1px solid transparent;
+  }
+  .nav { display: flex; gap: 6px; font-size: 8px; font-weight: 600; margin-left: auto }
+  .nav .on { padding: 2px 6px; border-radius: 6px }
+  .crumb { padding: 4px 10px 0; font-size: 7.5px; opacity: .7 }
+  .main { flex: 1; padding: 6px 8px 8px; min-height: 0 }
+  .ws {
+    border-radius: 10px; border: 1px solid transparent; overflow: hidden;
+    display: flex; flex-direction: column; min-height: 200px;
+  }
+  .ws-hd {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    padding: 8px 10px 6px; border-bottom: 1px solid transparent;
+  }
+  .ws-hd h3 { font-size: 11px; font-weight: 700 }
+  .ws-hd span { font-size: 7.5px; opacity: .65; display: block; margin-top: 1px }
+  .ws-hd .btn {
+    font-size: 7.5px; font-weight: 600; padding: 3px 7px; border-radius: 6px;
+    border: 1px solid transparent;
+  }
+  .filt {
+    display: flex; gap: 4px; padding: 6px 10px; border-bottom: 1px solid transparent;
+  }
+  .filt i {
+    height: 18px; border-radius: 6px; border: 1px solid transparent;
+    flex: 1; max-width: 100px;
+  }
+  .filt i.sm { flex: 0 0 70px }
+  .cols {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px;
+    padding: 6px; flex: 1; min-height: 140px;
+  }
+  .col {
+    border-radius: 8px; border: 1px solid transparent; padding: 5px; min-height: 120px;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .col-h {
+    display: flex; justify-content: space-between; align-items: center;
+    font-weight: 700; font-size: 8px; margin-bottom: 2px;
+  }
+  .cnt { font-size: 7px; font-weight: 700; padding: 0 4px; border-radius: 99px }
+  .tcard {
+    border-radius: 7px; border: 1px solid transparent; padding: 5px 6px;
+    position: relative;
+  }
+  .tcard h4 { font-size: 8.5px; font-weight: 700; margin: 0 12px 2px 0; line-height: 1.25 }
+  .tcard p { font-size: 7px; opacity: .7; margin: 0 0 3px; line-height: 1.25 }
+  .pills { display: flex; flex-wrap: wrap; gap: 2px }
+  .pill {
+    font-size: 6.5px; font-weight: 700; padding: 1px 4px; border-radius: 99px;
+    letter-spacing: .02em;
+  }
+  .idb {
+    position: absolute; top: 4px; right: 4px;
+    font-size: 6px; font-weight: 700; padding: 0 3px; border-radius: 99px;
+  }
+  .empty {
+    flex: 1; border: 1px dashed transparent; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 7px; opacity: .5; min-height: 40px;
+  }
+  .foot {
+    flex-shrink: 0; padding: 8px 10px; display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 6px;
+    font-size: 7px; border-top: 1px solid transparent;
+  }
+  .foot b { display: block; font-size: 6.5px; letter-spacing: .06em; margin-bottom: 3px; text-transform: uppercase }
+  .foot span { display: block; opacity: .65; margin-bottom: 1px }
+  .note {
+    margin-top: 1.75rem; padding: 1rem 1.1rem; border-radius: 12px;
+    background: #101826; border: 1px solid #243044; color: #94a3b8; font-size: 0.84rem; line-height: 1.55;
+  }
+  .note strong { color: #e2e8f0 }
+
+  /* ── Theme packs ── */
+  /* 1 Legacy */
+  .t1 .board { background: #eef2f7; color: #0f172a; font-family: Inter, sans-serif }
+  .t1 .topbar { background: #fff; border-color: #e2e8f0 }
+  .t1 .search { background: #f1f5f9; border-color: #e2e8f0; color: #64748b }
+  .t1 .nav .on { background: #e0f2fe; color: #0284c7 }
+  .t1 .ws { background: transparent; border: none }
+  .t1 .ws-hd { background: transparent; border: none; padding-left: 2px }
+  .t1 .filt { background: transparent; border: none }
+  .t1 .filt i { background: #fff; border-color: #cbd5e1 }
+  .t1 .cols { background: transparent }
+  .t1 .col { background: #e8edf4; border: none }
+  .t1 .cnt { background: #cfe8ff; color: #0369a1 }
+  .t1 .tcard { background: #e8f1fb; border-color: #c5d9ef }
+  .t1 .tcard.bl { background: #fff; border-left: 3px solid #ef4444 }
+  .t1 .pill.m { background: #64748b; color: #fff }
+  .t1 .pill.h { background: #0ea5e9; color: #fff }
+  .t1 .pill.l { background: #16a34a; color: #fff }
+  .t1 .idb { background: #fff; border: 1px solid #cbd5e1; color: #64748b }
+  .t1 .empty { border-color: #cbd5e1 }
+  .t1 .foot { background: #071018; color: #94a3b8; border-color: #1a2736 }
+  .t1 .foot b { color: #f8fafc }
+
+  /* 2 Command Center */
+  .t2 .board { background: #f3fafd; color: #0b1c28; font-family: Inter, sans-serif }
+  .t2 .topbar { background: rgba(255,255,255,.9); border-color: #d5e4ef }
+  .t2 .logo { font-family: Space Grotesk, sans-serif }
+  .t2 .search { background: #e8f4fa; border-color: #d5e4ef; color: #5a7184 }
+  .t2 .nav .on { background: #e0f2fe; color: #0284c7 }
+  .t2 .ws { background: transparent; border: none }
+  .t2 .filt i { background: #fff; border-color: #d5e4ef }
+  .t2 .col { background: #fff; border-color: #d5e4ef; box-shadow: 0 4px 12px rgba(7,16,24,.05) }
+  .t2 .tcard { background: #e8f4fa; border-color: #d5e4ef }
+  .t2 .pill { background: #f4f9fc; border: 1px solid #d5e4ef; color: #0b1c28 }
+  .t2 .pill.h { color: #ea580c; border-color: #fdba74 }
+  .t2 .pill.l { color: #16a34a; border-color: #86efac }
+  .t2 .cnt { color: #5a7184 }
+  .t2 .empty { border-color: #d5e4ef; background: #f8fafc }
+  .t2 .foot { background: #fff; border-color: #d5e4ef; color: #5a7184 }
+  .t2 .foot b { color: #0b1c28 }
+
+  /* 3 Current maker.png */
+  .t3 .board { background: #f0f4f8; color: #0f172a; font-family: Inter, sans-serif }
+  .t3 .topbar { background: #eef2f6; border-color: #d8e2ec }
+  .t3 .search { background: #fff; border-color: #d8e2ec; color: #5b6b7c }
+  .t3 .nav .on { background: #e0f2fe; color: #0284c7 }
+  .t3 .ws { background: #fff; border-color: #d8e2ec; box-shadow: 0 2px 12px rgba(15,23,42,.04) }
+  .t3 .ws-hd { background: #fafbfc; border-color: #e8eef4 }
+  .t3 .ws-hd .btn { background: #fff; border-color: #d8e2ec }
+  .t3 .filt { background: #fff; border-color: #e8eef4 }
+  .t3 .filt i { background: #f5f8fb; border-color: #d8e2ec }
+  .t3 .cols { background: #f5f8fb }
+  .t3 .col { background: #fff; border-color: #d8e2ec }
+  .t3 .cnt { background: #f5f8fb; border: 1px solid #d8e2ec; color: #5b6b7c }
+  .t3 .tcard { background: #fff; border-color: #d8e2ec }
+  .t3 .tcard.bl { border-left: 3px solid #ef4444 }
+  .t3 .pill.m { background: #64748b; color: #fff }
+  .t3 .pill.h { background: #0284c7; color: #fff }
+  .t3 .pill.l { background: #15803d; color: #fff }
+  .t3 .idb { background: #fff; border: 1px solid #e2e8f0; color: #64748b }
+  .t3 .empty { border-color: #d8e2ec; color: #94a3b8 }
+  .t3 .foot { background: #071018; color: #94a3b8; border-color: #1a2736 }
+  .t3 .foot b { color: #f8fafc }
+
+  /* 4 Linear Night — list+tabs on same shell */
+  .t4 .board { background: #0c0e12; color: #e8eaed }
+  .t4 .topbar { background: #0c0e12; border-color: #1c2028 }
+  .t4 .logo i { background: #5e6ad2 }
+  .t4 .search { background: #14171f; border-color: #1c2028; color: #8b919e; border-radius: 6px }
+  .t4 .nav .on { background: #1a1d2e; color: #a5b4fc }
+  .t4 .ws { background: #0c0e12; border-color: #1c2028 }
+  .t4 .ws-hd { background: #0c0e12; border-color: #1c2028 }
+  .t4 .ws-hd .btn { background: #14171f; border-color: #1c2028; color: #e8eaed }
+  .t4 .filt { background: #0c0e12; border-color: #1c2028; flex-wrap: wrap }
+  .t4 .filt .tabs { display: flex; gap: 0; width: 100%; border-bottom: 1px solid #1c2028; margin: -2px -10px 4px; padding: 0 6px }
+  .t4 .filt .tabs span { padding: 6px 7px; font-size: 7.5px; font-weight: 600; color: #6b7280; border-bottom: 2px solid transparent }
+  .t4 .filt .tabs .on { color: #e8eaed; border-bottom-color: #5e6ad2 }
+  .t4 .filt i { display: none }
+  .t4 .cols { grid-template-columns: 1fr; background: #0c0e12; padding: 0 }
+  .t4 .col { background: transparent; border: none; border-radius: 0; padding: 0 }
+  .t4 .col:not(:first-child) { display: none }
+  .t4 .col-h { display: none }
+  .t4 .tcard {
+    display: grid; grid-template-columns: 8px 1fr auto; gap: 6px; align-items: start;
+    background: transparent; border: none; border-bottom: 1px solid #161a22; border-radius: 0; padding: 7px 10px;
+  }
+  .t4 .tcard::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: #5e6ad2; margin-top: 2px }
+  .t4 .tcard.bl::before { background: #f2c94c }
+  .t4 .idb { position: static; border: 1px solid #2a303c; background: transparent; color: #8b919e }
+  .t4 .pill.m { background: transparent; border: 1px solid #2a303c; color: #8b919e }
+  .t4 .pill.h { background: transparent; border: 1px solid #5e6ad2; color: #a5b4fc }
+  .t4 .pill.l { background: transparent; border: 1px solid #4cb782; color: #4cb782 }
+  .t4 .empty { display: none }
+  .t4 .foot { background: #0c0e12; border-color: #1c2028; color: #6b7280 }
+  .t4 .foot b { color: #e8eaed }
+
+  /* 5 Paper Calm */
+  .t5 .board { background: #f7f3ec; color: #2c2416; font-family: 'IBM Plex Sans', sans-serif }
+  .t5 .topbar { background: #f7f3ec; border-color: #e8dfd0 }
+  .t5 .logo i { background: #b45309 }
+  .t5 .search { background: #fff; border-color: #e8dfd0; color: #8a7a64 }
+  .t5 .nav .on { background: #2c2416; color: #f7f3ec }
+  .t5 .ws { background: transparent; border: none }
+  .t5 .ws-hd {
+    background: #fff; border: 1px solid #e8dfd0; border-radius: 12px; margin-bottom: 6px;
+    box-shadow: 0 2px 8px rgba(44,36,22,.04);
+  }
+  .t5 .ws-hd .btn { background: #fff; border-color: #e8dfd0 }
+  .t5 .filt { background: transparent; border: none; gap: 4px }
+  .t5 .filt i { background: #fff; border-color: #e8dfd0; border-radius: 999px; max-width: none }
+  .t5 .cols { background: transparent; grid-template-columns: 1fr 1fr; gap: 6px }
+  .t5 .col:nth-child(n+3) { display: none }
+  .t5 .col { background: transparent; border: none; padding: 0 }
+  .t5 .tcard { background: #fff; border-color: #e8dfd0; border-radius: 10px; box-shadow: 0 1px 3px rgba(44,36,22,.04) }
+  .t5 .pill { background: #f3ebe0; color: #6b5640 }
+  .t5 .pill.h { background: #ffedd5; color: #c2410c }
+  .t5 .pill.l { background: #dcfce7; color: #166534 }
+  .t5 .idb { background: #f7f3ec; border: 1px solid #e8dfd0 }
+  .t5 .cnt { background: #f3ebe0; color: #6b5640 }
+  .t5 .empty { border-color: #e8dfd0; background: #fff }
+  .t5 .foot { background: #2c2416; color: #c4b5a0; border-color: #3d3424 }
+  .t5 .foot b { color: #f7f3ec }
+
+  /* 6 Snap Columns */
+  .t6 .board { background: #0079bf; color: #fff; font-family: 'DM Sans', sans-serif }
+  .t6 .topbar { background: rgba(0,0,0,.12); border: none }
+  .t6 .logo { color: #fff }
+  .t6 .logo i { background: #fff }
+  .t6 .search { background: rgba(255,255,255,.2); color: rgba(255,255,255,.9); border: none }
+  .t6 .nav { color: rgba(255,255,255,.85) }
+  .t6 .nav .on { background: rgba(255,255,255,.2); color: #fff }
+  .t6 .crumb { color: rgba(255,255,255,.75) }
+  .t6 .ws { background: transparent; border: none }
+  .t6 .ws-hd { color: #fff; border: none }
+  .t6 .ws-hd span { color: rgba(255,255,255,.75) }
+  .t6 .ws-hd .btn { background: rgba(255,255,255,.2); color: #fff; border: none }
+  .t6 .filt { border: none }
+  .t6 .filt i { background: rgba(255,255,255,.2); border: none }
+  .t6 .cols { background: transparent; gap: 6px; overflow: hidden }
+  .t6 .col {
+    background: #ebecf0; color: #172b4d; border: none; border-radius: 10px;
+    min-width: 0;
+  }
+  .t6 .cnt { background: #dfe1e6; color: #5e6c84 }
+  .t6 .tcard { background: #fff; border: none; box-shadow: 0 1px 1px rgba(9,30,66,.2) }
+  .t6 .pill { background: #f4f5f7; color: #5e6c84 }
+  .t6 .pill.h { background: #eb5a46; color: #fff }
+  .t6 .pill.l { background: #61bd4f; color: #fff }
+  .t6 .pill.m { background: #f2d600; color: #172b4d }
+  .t6 .idb { background: #f4f5f7; color: #5e6c84 }
+  .t6 .empty { border-color: #c1c7d0; background: transparent; color: #5e6c84 }
+  .t6 .foot { background: rgba(0,0,0,.2); color: rgba(255,255,255,.75); border: none }
+  .t6 .foot b { color: #fff }
+
+  /* 7 Glass */
+  .t7 .board {
+    background: linear-gradient(160deg, #1a1035 0%, #0f172a 50%, #0c4a6e 100%);
+    color: #f1f5f9;
+  }
+  .t7 .topbar { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.1); backdrop-filter: blur(8px) }
+  .t7 .logo i { background: linear-gradient(135deg,#a78bfa,#38bdf8) }
+  .t7 .search { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.12); color: rgba(255,255,255,.7); border-radius: 999px }
+  .t7 .nav .on { background: rgba(167,139,250,.25); color: #e9d5ff }
+  .t7 .ws { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.12); backdrop-filter: blur(10px) }
+  .t7 .ws-hd { border-color: rgba(255,255,255,.1) }
+  .t7 .ws-hd .btn { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.12); color: #f1f5f9 }
+  .t7 .filt { border-color: rgba(255,255,255,.1) }
+  .t7 .filt i { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.12) }
+  .t7 .cols { background: transparent }
+  .t7 .col { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.12) }
+  .t7 .cnt { background: rgba(255,255,255,.12); color: #cbd5e1 }
+  .t7 .tcard { background: rgba(255,255,255,.1); border-color: rgba(255,255,255,.12) }
+  .t7 .tcard.bl { border-left: 3px solid #f472b6 }
+  .t7 .pill { background: rgba(255,255,255,.12); color: #e2e8f0 }
+  .t7 .pill.h { background: rgba(251,146,60,.3); color: #fdba74 }
+  .t7 .pill.l { background: rgba(74,222,128,.2); color: #86efac }
+  .t7 .pill.m { background: rgba(148,163,184,.25); color: #e2e8f0 }
+  .t7 .idb { background: rgba(0,0,0,.25); color: #cbd5e1; border: 1px solid rgba(255,255,255,.1) }
+  .t7 .empty { border-color: rgba(255,255,255,.15); color: rgba(255,255,255,.5) }
+  .t7 .foot { background: rgba(7,16,24,.85); border-color: rgba(255,255,255,.08); color: #94a3b8 }
+  .t7 .foot b { color: #f8fafc }
+
+  /* 8 Terminal */
+  .t8 .board { background: #0a0c0a; color: #c8f5c0; font-family: 'JetBrains Mono', monospace }
+  .t8 .topbar { background: #0a0c0a; border-color: #1a2e1a }
+  .t8 .logo { color: #39ff14 }
+  .t8 .logo i { background: #39ff14; border-radius: 2px }
+  .t8 .search { background: #0f140f; border-color: #1f3a1f; color: #6a9a64; border-radius: 2px }
+  .t8 .nav .on { color: #39ff14; background: #0f140f }
+  .t8 .ws { background: #0a0c0a; border-color: #1a2e1a; border-radius: 2px }
+  .t8 .ws-hd { border-color: #1a2e1a }
+  .t8 .ws-hd .btn { background: #0f140f; border-color: #1f3a1f; color: #c8f5c0; border-radius: 2px }
+  .t8 .filt { border-color: #1a2e1a }
+  .t8 .filt i { background: #0f140f; border-color: #1f3a1f; border-radius: 2px }
+  .t8 .cols { grid-template-columns: 1fr; background: #0a0c0a; padding: 4px 6px }
+  .t8 .col:not(:first-child) { display: none }
+  .t8 .col { background: transparent; border: none; padding: 0 }
+  .t8 .col-h { font-size: 7px; color: #6a9a64; letter-spacing: .06em }
+  .t8 .tcard {
+    background: transparent; border: none; border-bottom: 1px solid #121a12; border-radius: 0;
+    display: grid; grid-template-columns: 16px 1fr 40px; gap: 4px; padding: 5px 2px;
+  }
+  .t8 .pill.m { background: transparent; color: #c8f5c0 }
+  .t8 .pill.h { background: transparent; color: #fbbf24 }
+  .t8 .pill.l { background: transparent; color: #39ff14 }
+  .t8 .idb { position: static; background: transparent; border: none; color: #4a6a48 }
+  .t8 .empty { display: none }
+  .t8 .foot { background: #0a0c0a; border-color: #1a2e1a; color: #4a6a48 }
+  .t8 .foot b { color: #39ff14 }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>8 designs of the same screen</h1>
+  <p class="lede">
+    Target screen = your <code>maker.png</code>: project board with global header, breadcrumb,
+    workspace card (title + filter + 5 columns), and multi-column footer.
+    Options <b>1–3</b> are prior eras (3 = current production shape).
+    Options <b>4–8</b> are new proposals from a 5-person senior mobile UX team — each changes
+    structure or theme, not just a recolor.
+  </p>
+  <div class="target">
+    <span><b>Screen:</b> /app/projects/:id board</span>
+    <span><b>Source:</b> <code>Downloads/maker.png</code></span>
+    <span><b>Live:</b> kanban-board-public.pages.dev</span>
+  </div>
+  <div class="team">
+    <span class="chip"><b>A1</b> Mobile systems</span>
+    <span class="chip"><b>A2</b> Visual density</span>
+    <span class="chip"><b>A3</b> Interaction / drag</span>
+    <span class="chip"><b>A4</b> Accessibility</span>
+    <span class="chip"><b>A5</b> SaaS craft</span>
+  </div>
+
+  <div class="section-label">Prior eras (1–3) · 3 = maker.png baseline</div>
+  <div class="grid">
+
+    <article class="card prior">
+      <div class="num">01 · prior</div>
+      <div class="name">Legacy Task Board</div>
+      <div class="meta">Solid pills · ID badges · blue-tint cards · red blocked edge · black footer · dense agent chrome</div>
+      <div class="swatches">
+        <i class="sw" style="background:#e8f1fb"></i><i class="sw" style="background:#1d4ed8"></i>
+        <i class="sw" style="background:#0ea5e9"></i><i class="sw" style="background:#071018"></i>
+      </div>
+      <div class="frame">
+        <div class="chrome"><span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span><span class="url">…/app/projects/test1</span></div>
+        <div class="board t1">
+          <div class="topbar">
+            <div class="logo"><i></i>FlowBoard</div>
+            <div class="search">Search…</div>
+            <div class="nav"><span>About</span><span class="on">Dashboard</span><span>Out</span></div>
+          </div>
+          <div class="crumb">Home / Dashboard / test1</div>
+          <div class="main">
+            <div class="ws">
+              <div class="ws-hd"><div><h3>test1</h3><span>4 tasks · drag between columns</span></div><span class="btn">All projects</span></div>
+              <div class="filt"><i></i><i class="sm"></i></div>
+              <div class="cols">
+                <div class="col"><div class="col-h"><span>● Backlog</span><span class="cnt">1</span></div>
+                  <div class="tcard"><span class="idb">53AA</span><h4>test</h4><p>test</p><div class="pills"><span class="pill m">MEDIUM</span></div></div>
+                </div>
+                <div class="col"><div class="col-h"><span>● Next Up</span><span class="cnt">2</span></div>
+                  <div class="tcard"><span class="idb">8824</span><h4>Plan this week</h4><p>List top 3…</p><div class="pills"><span class="pill h">HIGH</span></div></div>
+                  <div class="tcard"><span class="idb">BC58</span><h4>Inbox zero</h4><p>Clear email…</p><div class="pills"><span class="pill l">LOW</span></div></div>
+                </div>
+                <div class="col"><div class="col-h"><span>● Progress</span><span class="cnt">1</span></div>
+                  <div class="tcard bl"><span class="idb">1451</span><h4>Deep work</h4><p>90 minutes…</p><div class="pills"><span class="pill m">MEDIUM</span></div></div>
+                </div>
+                <div class="col"><div class="col-h"><span>● Blocked</span><span class="cnt">0</span></div><div class="empty">Drop</div></div>
+                <div class="col"><div class="col-h"><span>● Done</span><span class="cnt">0</span></div><div class="empty">Drop</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="foot">
+            <div><b>FlowBoard</b><span>Clarity without clutter</span></div>
+            <div><b>Product</b><span>Get started</span><span>Dashboard</span></div>
+            <div><b>Company</b><span>About</span><span>Contact</span></div>
+            <div><b>Legal</b><span>Privacy</span><span>Terms</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="persona">A2: Highest density. Strong priority scan. Cramped on phone.</div>
+    </article>
+
+    <article class="card prior">
+      <div class="num">02 · prior</div>
+      <div class="name">Command Center Cyan</div>
+      <div class="meta">Soft cyan SaaS · Space Grotesk · outline chips · frosted header · light footer</div>
+      <div class="swatches">
+        <i class="sw" style="background:#f3fafd"></i><i class="sw" style="background:#0284c7"></i>
+        <i class="sw" style="background:#e8f4fa"></i><i class="sw" style="background:#fff"></i>
+      </div>
+      <div class="frame">
+        <div class="chrome"><span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span><span class="url">…/app/projects/test1</span></div>
+        <div class="board t2">
+          <div class="topbar">
+            <div class="logo"><i></i>FlowBoard</div>
+            <div class="search">⌕ Search tasks…</div>
+            <div class="nav"><span>About</span><span class="on">Dashboard</span><span>Out</span></div>
+          </div>
+          <div class="crumb">Home / Dashboard / test1</div>
+          <div class="main">
+            <div class="ws">
+              <div class="ws-hd"><div><h3>test1</h3><span>4 / 4 tasks · drag cards</span></div><span class="btn">All projects</span></div>
+              <div class="filt"><i></i><i class="sm"></i></div>
+              <div class="cols">
+                <div class="col"><div class="col-h"><span>Backlog</span><span class="cnt">1</span></div>
+                  <div class="tcard"><h4>test</h4><p>test</p><div class="pills"><span class="pill m">medium</span></div></div>
+                </div>
+                <div class="col"><div class="col-h"><span>Next Up</span><span class="cnt">2</span></div>
+                  <div class="tcard"><h4>Plan this week</h4><p>List top 3…</p><div class="pills"><span class="pill h">high</span></div></div>
+                  <div class="tcard"><h4>Inbox zero</h4><p>Clear email…</p><div class="pills"><span class="pill l">low</span></div></div>
+                </div>
+                <div class="col"><div class="col-h"><span>In Progress</span><span class="cnt">1</span></div>
+                  <div class="tcard"><h4>Deep work</h4><p>90 minutes…</p><div class="pills"><span class="pill m">medium</span></div></div>
+                </div>
+                <div class="col"><div class="col-h"><span>Blocked</span><span class="cnt">0</span></div><div class="empty">Drop</div></div>
+                <div class="col"><div class="col-h"><span>Done</span><span class="cnt">0</span></div><div class="empty">Drop</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="foot">
+            <div><b>FlowBoard</b><span>Modern boards</span></div>
+            <div><b>Product</b><span>Get started</span></div>
+            <div><b>Company</b><span>About</span></div>
+            <div><b>Legal</b><span>Privacy</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="persona">A5: Friendly polish. Weaker priority hierarchy than solid pills.</div>
+    </article>
+
+    <article class="card prior current">
+      <div class="num">03 · prior · current · maker.png</div>
+      <div class="name">v4 Unified Workspace</div>
+      <div class="meta">Exact production structure from your screenshot: workspace panel, solid pills, IDs, 5 columns, black footer</div>
+      <div class="swatches">
+        <i class="sw" style="background:#f0f4f8"></i><i class="sw" style="background:#fff"></i>
+        <i class="sw" style="background:#0284c7"></i><i class="sw" style="background:#071018"></i>
+      </div>
+      <div class="frame">
+        <div class="chrome"><span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span><span class="url">kanban-board-public.pages.dev/app/projects/…</span></div>
+        <div class="board t3">
+          <div class="topbar">
+            <div class="logo"><i></i>FlowBoard</div>
+            <div class="search">Search tasks…</div>
+            <div class="nav"><span>About</span><span>Contact</span><span class="on">Dashboard</span><span>Sign out</span></div>
+          </div>
+          <div class="crumb">Home / Dashboard / test1</div>
+          <div class="main">
+            <div class="ws">
+              <div class="ws-hd"><div><h3>test1</h3><span>4 / 4 tasks · drag to move · auto-saves</span></div><span class="btn">All projects</span></div>
+              <div class="filt"><i></i><i class="sm"></i></div>
+              <div class="cols">
+                <div class="col"><div class="col-h"><span>● Backlog</span><span class="cnt">1</span></div>
+                  <div class="tcard"><span class="idb">53AA9E</span><h4>test</h4><p>test</p><div class="pills"><span class="pill m">MEDIUM</span></div></div>
+                </div>
+                <div class="col"><div class="col-h"><span>● Next Up</span><span class="cnt">2</span></div>
+                  <div class="tcard"><span class="idb">88243A</span><h4>Plan this week</h4><p>List top 3 priorities.</p><div class="pills"><span class="pill h">HIGH</span><span class="pill m">planning</span></div></div>
+                  <div class="tcard"><span class="idb">BC5B75</span><h4>Inbox zero</h4><p>Clear email and messages.</p><div class="pills"><span class="pill l">LOW</span><span class="pill m">admin</span></div></div>
+                </div>
+                <div class="col"><div class="col-h"><span>● In Progress</span><span class="cnt">1</span></div>
+                  <div class="tcard"><span class="idb">1451C0</span><h4>Deep work block</h4><p>90 minutes without meetings.</p><div class="pills"><span class="pill m">MEDIUM</span></div></div>
+                </div>
+                <div class="col"><div class="col-h"><span>● Blocked</span><span class="cnt">0</span></div><div class="empty">Drop cards here</div></div>
+                <div class="col"><div class="col-h"><span>● Done</span><span class="cnt">0</span></div><div class="empty">Drop cards here</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="foot">
+            <div><b>FlowBoard</b><span>Modern project boards…</span></div>
+            <div><b>Product</b><span>Get started</span><span>Search</span><span>Dashboard</span></div>
+            <div><b>Company</b><span>About us</span><span>Contact</span></div>
+            <div><b>Legal</b><span>Privacy</span><span>Terms</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="persona">A1: Baseline. Coherent system. Still desktop-first on small phones.</div>
+    </article>
+  </div>
+
+  <div class="section-label">New proposals (4–8) · same screen, new theme or structure</div>
+  <div class="grid">
+
+    <article class="card proposal">
+      <div class="num">04 · new</div>
+      <div class="name">Linear Night Ops</div>
+      <div class="meta">Same header/footer shell · board becomes tabbed issue list (mobile-first) · indigo dark · FAB-ready</div>
+      <div class="swatches">
+        <i class="sw" style="background:#0c0e12"></i><i class="sw" style="background:#5e6ad2"></i>
+        <i class="sw" style="background:#14171f"></i><i class="sw" style="background:#e8eaed"></i>
+      </div>
+      <div class="frame">
+        <div class="chrome"><span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span><span class="url">…/app/projects/test1</span></div>
+        <div class="board t4">
+          <div class="topbar">
+            <div class="logo"><i></i>FlowBoard</div>
+            <div class="search">Filter issues…</div>
+            <div class="nav"><span>About</span><span class="on">Dashboard</span><span>Out</span></div>
+          </div>
+          <div class="crumb">Home / Dashboard / test1</div>
+          <div class="main">
+            <div class="ws">
+              <div class="ws-hd"><div><h3>test1</h3><span>4 issues · Next Up</span></div><span class="btn">All projects</span></div>
+              <div class="filt">
+                <div class="tabs">
+                  <span>Backlog</span><span class="on">Next Up</span><span>Progress</span><span>Blocked</span><span>Done</span>
+                </div>
+              </div>
+              <div class="cols">
+                <div class="col">
+                  <div class="tcard"><h4>Plan this week</h4><p>List top 3 priorities. · #planning</p><div class="pills"><span class="pill h">H</span></div><span class="idb">88243A</span></div>
+                  <div class="tcard"><h4>Inbox zero</h4><p>Clear email and messages.</p><div class="pills"><span class="pill l">L</span></div><span class="idb">BC5B75</span></div>
+                  <div class="tcard bl"><h4>Deep work block</h4><p>90 minutes · 📎 💬</p><div class="pills"><span class="pill m">M</span></div><span class="idb">1451C0</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="foot">
+            <div><b>FlowBoard</b><span>Ops clarity</span></div>
+            <div><b>Product</b><span>Dashboard</span></div>
+            <div><b>Company</b><span>About</span></div>
+            <div><b>Legal</b><span>Privacy</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="persona">A3: Best one-handed scan. Replace side-scroll with tabs; move = column sheet.</div>
+    </article>
+
+    <article class="card proposal">
+      <div class="num">05 · new</div>
+      <div class="name">Paper Calm</div>
+      <div class="meta">Warm paper · hero project card · 2-up stacked columns · soft chips · dark brown footer</div>
+      <div class="swatches">
+        <i class="sw" style="background:#f7f3ec"></i><i class="sw" style="background:#b45309"></i>
+        <i class="sw" style="background:#fff"></i><i class="sw" style="background:#2c2416"></i>
+      </div>
+      <div class="frame">
+        <div class="chrome"><span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span><span class="url">…/app/projects/test1</span></div>
+        <div class="board t5">
+          <div class="topbar">
+            <div class="logo"><i></i>FlowBoard</div>
+            <div class="search">Search…</div>
+            <div class="nav"><span>About</span><span class="on">Dashboard</span><span>Out</span></div>
+          </div>
+          <div class="crumb">Home / Dashboard / test1</div>
+          <div class="main">
+            <div class="ws">
+              <div class="ws-hd"><div><h3>test1</h3><span>4 tasks · focus mode off</span></div><span class="btn">All projects</span></div>
+              <div class="filt"><i></i><i class="sm"></i></div>
+              <div class="cols">
+                <div class="col"><div class="col-h"><span>Next Up</span><span class="cnt">2</span></div>
+                  <div class="tcard"><span class="idb">8824</span><h4>Plan this week</h4><p>List top 3 priorities.</p><div class="pills"><span class="pill h">High</span></div></div>
+                  <div class="tcard"><span class="idb">BC58</span><h4>Inbox zero</h4><p>Clear email…</p><div class="pills"><span class="pill l">Low</span></div></div>
+                </div>
+                <div class="col"><div class="col-h"><span>In Progress</span><span class="cnt">1</span></div>
+                  <div class="tcard"><span class="idb">1451</span><h4>Deep work block</h4><p>90 minutes…</p><div class="pills"><span class="pill m">Med</span></div></div>
+                  <div class="empty">Drop</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="foot">
+            <div><b>FlowBoard</b><span>Human boards</span></div>
+            <div><b>Product</b><span>Get started</span></div>
+            <div><b>Company</b><span>About</span></div>
+            <div><b>Legal</b><span>Privacy</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="persona">A4: Warm contrast, large targets. Feels maker-tool, not ops console.</div>
+    </article>
+
+    <article class="card proposal">
+      <div class="num">06 · new</div>
+      <div class="name">Snap Columns</div>
+      <div class="meta">Full-bleed blue board · same 5 columns · Trello-like cards · dark translucent footer</div>
+      <div class="swatches">
+        <i class="sw" style="background:#0079bf"></i><i class="sw" style="background:#ebecf0"></i>
+        <i class="sw" style="background:#fff"></i><i class="sw" style="background:#eb5a46"></i>
+      </div>
+      <div class="frame">
+        <div class="chrome"><span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span><span class="url">…/app/projects/test1</span></div>
+        <div class="board t6">
+          <div class="topbar">
+            <div class="logo"><i></i>FlowBoard</div>
+            <div class="search">Search cards…</div>
+            <div class="nav"><span>About</span><span class="on">Dashboard</span><span>Out</span></div>
+          </div>
+          <div class="crumb">Home / Dashboard / test1</div>
+          <div class="main">
+            <div class="ws">
+              <div class="ws-hd"><div><h3>test1</h3><span>4 cards · swipe columns on mobile</span></div><span class="btn">All projects</span></div>
+              <div class="filt"><i></i><i class="sm"></i></div>
+              <div class="cols">
+                <div class="col"><div class="col-h"><span>Backlog</span><span class="cnt">1</span></div>
+                  <div class="tcard"><h4>test</h4><p>test</p><div class="pills"><span class="pill m">MED</span></div></div>
+                </div>
+                <div class="col"><div class="col-h"><span>Next Up</span><span class="cnt">2</span></div>
+                  <div class="tcard"><h4>Plan this week</h4><p>List top 3…</p><div class="pills"><span class="pill h">HIGH</span></div></div>
+                  <div class="tcard"><h4>Inbox zero</h4><p>Clear email…</p><div class="pills"><span class="pill l">LOW</span></div></div>
+                </div>
+                <div class="col"><div class="col-h"><span>Progress</span><span class="cnt">1</span></div>
+                  <div class="tcard"><h4>Deep work</h4><p>90 minutes…</p><div class="pills"><span class="pill m">MED</span></div></div>
+                </div>
+                <div class="col"><div class="col-h"><span>Blocked</span><span class="cnt">0</span></div><div class="empty">Drop</div></div>
+                <div class="col"><div class="col-h"><span>Done</span><span class="cnt">0</span></div><div class="empty">Drop</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="foot">
+            <div><b>FlowBoard</b><span>Boards for makers</span></div>
+            <div><b>Product</b><span>Dashboard</span></div>
+            <div><b>Company</b><span>About</span></div>
+            <div><b>Legal</b><span>Privacy</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="persona">A3: Strongest classic kanban feel. Mobile: snap one column wide.</div>
+    </article>
+
+    <article class="card proposal">
+      <div class="num">07 · new</div>
+      <div class="name">Glass Lane</div>
+      <div class="meta">Same workspace structure as maker.png · night glass palette · violet/cyan · dark footer</div>
+      <div class="swatches">
+        <i class="sw" style="background:#1a1035"></i><i class="sw" style="background:#a78bfa"></i>
+        <i class="sw" style="background:#38bdf8"></i><i class="sw" style="background:#071018"></i>
+      </div>
+      <div class="frame">
+        <div class="chrome"><span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span><span class="url">…/app/projects/test1</span></div>
+        <div class="board t7">
+          <div class="topbar">
+            <div class="logo"><i></i>FlowBoard</div>
+            <div class="search">Search tasks…</div>
+            <div class="nav"><span>About</span><span class="on">Dashboard</span><span>Out</span></div>
+          </div>
+          <div class="crumb">Home / Dashboard / test1</div>
+          <div class="main">
+            <div class="ws">
+              <div class="ws-hd"><div><h3>test1</h3><span>4 / 4 tasks · auto-saves</span></div><span class="btn">All projects</span></div>
+              <div class="filt"><i></i><i class="sm"></i></div>
+              <div class="cols">
+                <div class="col"><div class="col-h"><span>Backlog</span><span class="cnt">1</span></div>
+                  <div class="tcard"><span class="idb">53AA</span><h4>test</h4><p>test</p><div class="pills"><span class="pill m">MEDIUM</span></div></div>
+                </div>
+                <div class="col"><div class="col-h"><span>Next Up</span><span class="cnt">2</span></div>
+                  <div class="tcard"><span class="idb">8824</span><h4>Plan this week</h4><p>List top 3…</p><div class="pills"><span class="pill h">HIGH</span></div></div>
+                  <div class="tcard"><span class="idb">BC58</span><h4>Inbox zero</h4><p>Clear email…</p><div class="pills"><span class="pill l">LOW</span></div></div>
+                </div>
+                <div class="col"><div class="col-h"><span>Progress</span><span class="cnt">1</span></div>
+                  <div class="tcard bl"><span class="idb">1451</span><h4>Deep work</h4><p>90 minutes…</p><div class="pills"><span class="pill m">MEDIUM</span></div></div>
+                </div>
+                <div class="col"><div class="col-h"><span>Blocked</span><span class="cnt">0</span></div><div class="empty">Drop</div></div>
+                <div class="col"><div class="col-h"><span>Done</span><span class="cnt">0</span></div><div class="empty">Drop</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="foot">
+            <div><b>FlowBoard</b><span>Premium boards</span></div>
+            <div><b>Product</b><span>Dashboard</span></div>
+            <div><b>Company</b><span>About</span></div>
+            <div><b>Legal</b><span>Privacy</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="persona">A5: Same IA as maker.png — pure visual upgrade. Watch glass contrast (A4).</div>
+    </article>
+
+    <article class="card proposal">
+      <div class="num">08 · new</div>
+      <div class="name">Terminal Table</div>
+      <div class="meta">Same route · board body = SEV/TITLE/META table · mono green · max ops density</div>
+      <div class="swatches">
+        <i class="sw" style="background:#0a0c0a"></i><i class="sw" style="background:#39ff14"></i>
+        <i class="sw" style="background:#0f140f"></i><i class="sw" style="background:#fbbf24"></i>
+      </div>
+      <div class="frame">
+        <div class="chrome"><span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span><span class="url">…/app/projects/test1</span></div>
+        <div class="board t8">
+          <div class="topbar">
+            <div class="logo"><i></i>flowboard</div>
+            <div class="search">grep…</div>
+            <div class="nav"><span>about</span><span class="on">dash</span><span>out</span></div>
+          </div>
+          <div class="crumb">~/projects/test1</div>
+          <div class="main">
+            <div class="ws">
+              <div class="ws-hd"><div><h3>test1</h3><span>board --cols all</span></div><span class="btn">ls projects</span></div>
+              <div class="filt"><i></i><i class="sm"></i></div>
+              <div class="cols">
+                <div class="col">
+                  <div class="col-h">SEV · TITLE · ID</div>
+                  <div class="tcard"><div class="pills"><span class="pill m">M</span></div><h4>test</h4><p>backlog</p><span class="idb">53AA9E</span></div>
+                  <div class="tcard"><div class="pills"><span class="pill h">H</span></div><h4>Plan this week</h4><p>next</p><span class="idb">88243A</span></div>
+                  <div class="tcard"><div class="pills"><span class="pill l">L</span></div><h4>Inbox zero</h4><p>next</p><span class="idb">BC5B75</span></div>
+                  <div class="tcard"><div class="pills"><span class="pill m">M</span></div><h4>Deep work block</h4><p>progress</p><span class="idb">1451C0</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="foot">
+            <div><b>flowboard</b><span>ops mode</span></div>
+            <div><b>cmd</b><span>board</span></div>
+            <div><b>sys</b><span>about</span></div>
+            <div><b>legal</b><span>privacy</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="persona">A2: Fastest multi-task scan. Weak for drag storytelling.</div>
+    </article>
+  </div>
+
+  <div class="note">
+    <strong>How to choose</strong><br />
+    · Stay closest to <code>maker.png</code> → pick <strong>3</strong> (current) or pure visual <strong>7</strong>.<br />
+    · Better phone UX without throwing away desktop → <strong>4</strong> (tabs) or <strong>6</strong> (snap) for <code>&lt;1024px</code> only.<br />
+    · Human / maker vibe → <strong>5</strong>. Ops / agent vibe → <strong>8</strong>. Classic pills density → <strong>1</strong>.<br />
+    · Black footer stays on 1, 3, 4, 5, 7 unless you ask otherwise.<br /><br />
+    Reply with <strong>1–8</strong> or a mix, e.g. “shell of 3, palette of 7, mobile layout of 4.”
+  </div>
+</div>
+</body>
+</html>

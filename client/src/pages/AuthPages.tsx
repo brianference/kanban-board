@@ -1,20 +1,34 @@
-import { FormEvent, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { FormEvent, useEffect, useState } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Shell } from '../components/layout/Shell'
 import { Seo } from '../components/Seo'
 import { api } from '../lib/api'
 import { useAuth } from '../hooks/useAuth'
 import { useToast } from '../hooks/useToast'
 
+/** Safe in-app path only (no open redirect). */
+function safeReturnPath(from: unknown, fallback: string): string {
+  if (typeof from !== 'string' || !from.startsWith('/') || from.startsWith('//')) return fallback
+  return from
+}
+
 export function RegisterPage() {
   const nav = useNavigate()
-  const { setUser } = useAuth()
+  const loc = useLocation()
+  const { user, setUser, loading } = useAuth()
   const { push } = useToast()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const from = (loc.state as { from?: string } | null)?.from
+
+  useEffect(() => {
+    if (!loading && user) {
+      nav(safeReturnPath(from, '/app'), { replace: true })
+    }
+  }, [user, loading, from, nav])
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault()
@@ -24,7 +38,9 @@ export function RegisterPage() {
       const res = await api.register({ email, password, name })
       setUser(res.user)
       push('Account created', 'success')
-      nav(`/app/projects/${res.projectId}`)
+      // Prefer first project for new accounts; honor deep-link only if not generic
+      const dest = safeReturnPath(from, `/app/projects/${res.projectId}`)
+      nav(dest.startsWith('/app') ? dest : `/app/projects/${res.projectId}`)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed')
     } finally {
@@ -89,12 +105,20 @@ export function RegisterPage() {
 
 export function LoginPage() {
   const nav = useNavigate()
-  const { setUser } = useAuth()
+  const loc = useLocation()
+  const { user, setUser, loading } = useAuth()
   const { push } = useToast()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const from = (loc.state as { from?: string } | null)?.from
+
+  useEffect(() => {
+    if (!loading && user) {
+      nav(safeReturnPath(from, '/app'), { replace: true })
+    }
+  }, [user, loading, from, nav])
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault()
@@ -104,7 +128,8 @@ export function LoginPage() {
       const res = await api.login({ email, password })
       setUser(res.user)
       push('Signed in', 'success')
-      nav('/app')
+      // Return to the page they tried to open (task/board), not always dashboard
+      nav(safeReturnPath(from, '/app'))
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed')
     } finally {

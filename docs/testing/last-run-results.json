@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-07-19T20:54:41.784Z",
+  "generatedAt": "2026-07-19T20:59:41.571Z",
   "base": "https://kanban-board-public.pages.dev",
   "totals": {
-    "passed": 89,
-    "failed": 12,
+    "passed": 91,
+    "failed": 11,
     "skipped": 1,
-    "total": 102
+    "total": 103
   },
   "suites": [
     {
@@ -14,7 +14,7 @@
       "failed": 0,
       "skipped": 0,
       "total": 63,
-      "durationMs": 6577,
+      "durationMs": 5952,
       "results": [
         {
           "id": "UAT-002",
@@ -463,22 +463,22 @@
         {
           "suite": "comprehensive-api",
           "msg": "Auth forms are client-rendered; static fetch only proves SPA shell, not form DOM",
-          "at": "2026-07-19T20:51:15.015Z"
+          "at": "2026-07-19T20:56:54.355Z"
         },
         {
           "suite": "comprehensive-api",
           "msg": "Origin check on mutating auth routes returns 403 for foreign Origin",
-          "at": "2026-07-19T20:51:16.458Z"
+          "at": "2026-07-19T20:56:55.505Z"
         }
       ]
     },
     {
       "suite": "playwright-visual-ux-mobile",
-      "passed": 25,
-      "failed": 1,
+      "passed": 27,
+      "failed": 0,
       "skipped": 0,
-      "total": 26,
-      "durationMs": 88985,
+      "total": 27,
+      "durationMs": 49826,
       "results": [
         {
           "id": "UAT-009",
@@ -644,8 +644,15 @@
         {
           "id": "UAT-094",
           "name": "task form controls present mobile",
-          "status": "fail",
-          "detail": "assertion failed",
+          "status": "pass",
+          "detail": "",
+          "ms": 0
+        },
+        {
+          "id": "UAT-094b",
+          "name": "inputs reasonably wide",
+          "status": "pass",
+          "detail": "",
           "ms": 0
         },
         {
@@ -663,20 +670,12 @@
           "ms": 0
         }
       ],
-      "bugs": [
-        {
-          "id": "UAT-094",
-          "name": "task form controls present mobile",
-          "detail": "assertion failed",
-          "suite": "playwright-visual-ux-mobile",
-          "severity": "found"
-        }
-      ],
+      "bugs": [],
       "learnings": [
         {
           "suite": "playwright-visual-ux-mobile",
           "msg": "Primary controls min height 38.390625px — below 44px WCAG 2.5.5 AAA, OK for AA if spacing allows",
-          "at": "2026-07-19T20:52:49.034Z"
+          "at": "2026-07-19T20:57:48.988Z"
         }
       ]
     },
@@ -686,7 +685,7 @@
       "failed": 11,
       "skipped": 0,
       "total": 12,
-      "durationMs": 111755,
+      "durationMs": 111613,
       "results": [
         {
           "id": "UAT-097",
@@ -710,56 +709,56 @@
           "ms": 0
         },
         {
-          "id": "user-15",
+          "id": "user-24",
           "name": "user journey failed",
           "status": "fail",
           "detail": "register 429",
           "ms": 0
         },
         {
-          "id": "user-16",
+          "id": "user-25",
           "name": "user journey failed",
           "status": "fail",
           "detail": "register 429",
           "ms": 0
         },
         {
-          "id": "user-17",
+          "id": "user-26",
           "name": "user journey failed",
           "status": "fail",
           "detail": "register 429",
           "ms": 0
         },
         {
-          "id": "user-18",
+          "id": "user-27",
           "name": "user journey failed",
           "status": "fail",
           "detail": "register 429",
           "ms": 0
         },
         {
-          "id": "user-19",
+          "id": "user-28",
           "name": "user journey failed",
           "status": "fail",
           "detail": "register 429",
           "ms": 0
         },
         {
-          "id": "user-20",
+          "id": "user-29",
           "name": "user journey failed",
           "status": "fail",
           "detail": "register 429",
           "ms": 0
         },
         {
-          "id": "user-21",
+          "id": "user-30",
           "name": "user journey failed",
           "status": "fail",
           "detail": "register 429",
           "ms": 0
         },
         {
-          "id": "user-22",
+          "id": "user-31",
           "name": "user journey failed",
           "status": "fail",
           "detail": "register 429",
@@ -767,7 +766,7 @@
         },
         {
           "id": "STRESS-001",
-          "name": "spike 30 concurrent journeys 6/30",
+          "name": "spike 30 concurrent journeys 11/30",
           "status": "fail",
           "detail": "assertion failed",
           "ms": 0
@@ -789,56 +788,56 @@
           "severity": "found"
         },
         {
-          "id": "user-15",
+          "id": "user-24",
           "name": "user journey failed",
           "detail": "register 429",
           "suite": "100-user-sim",
           "severity": "found"
         },
         {
-          "id": "user-16",
+          "id": "user-25",
           "name": "user journey failed",
           "detail": "register 429",
           "suite": "100-user-sim",
           "severity": "found"
         },
         {
-          "id": "user-17",
+          "id": "user-26",
           "name": "user journey failed",
           "detail": "register 429",
           "suite": "100-user-sim",
           "severity": "found"
         },
         {
-          "id": "user-18",
+          "id": "user-27",
           "name": "user journey failed",
           "detail": "register 429",
           "suite": "100-user-sim",
           "severity": "found"
         },
         {
-          "id": "user-19",
+          "id": "user-28",
           "name": "user journey failed",
           "detail": "register 429",
           "suite": "100-user-sim",
           "severity": "found"
         },
         {
-          "id": "user-20",
+          "id": "user-29",
           "name": "user journey failed",
           "detail": "register 429",
           "suite": "100-user-sim",
           "severity": "found"
         },
         {
-          "id": "user-21",
+          "id": "user-30",
           "name": "user journey failed",
           "detail": "register 429",
           "suite": "100-user-sim",
           "severity": "found"
         },
         {
-          "id": "user-22",
+          "id": "user-31",
           "name": "user journey failed",
           "detail": "register 429",
           "suite": "100-user-sim",
@@ -846,7 +845,7 @@
         },
         {
           "id": "STRESS-001",
-          "name": "spike 30 concurrent journeys 6/30",
+          "name": "spike 30 concurrent journeys 11/30",
           "detail": "assertion failed",
           "suite": "100-user-sim",
           "severity": "found"
@@ -855,53 +854,53 @@
       "learnings": [
         {
           "suite": "100-user-sim",
-          "msg": "register: n=45 p50=725ms p95=885ms max=1014ms",
-          "at": "2026-07-19T20:54:37.113Z"
+          "msg": "register: n=45 p50=687ms p95=830ms max=916ms",
+          "at": "2026-07-19T20:59:37.021Z"
         },
         {
           "suite": "100-user-sim",
-          "msg": "session: n=45 p50=25ms p95=31ms max=60ms",
-          "at": "2026-07-19T20:54:37.113Z"
+          "msg": "session: n=45 p50=24ms p95=32ms max=71ms",
+          "at": "2026-07-19T20:59:37.021Z"
         },
         {
           "suite": "100-user-sim",
-          "msg": "board: n=45 p50=240ms p95=276ms max=314ms",
-          "at": "2026-07-19T20:54:37.113Z"
+          "msg": "board: n=45 p50=224ms p95=274ms max=322ms",
+          "at": "2026-07-19T20:59:37.021Z"
         },
         {
           "suite": "100-user-sim",
-          "msg": "createTask: n=45 p50=175ms p95=201ms max=216ms",
-          "at": "2026-07-19T20:54:37.113Z"
+          "msg": "createTask: n=45 p50=177ms p95=210ms max=220ms",
+          "at": "2026-07-19T20:59:37.021Z"
         },
         {
           "suite": "100-user-sim",
-          "msg": "comment: n=45 p50=131ms p95=162ms max=170ms",
-          "at": "2026-07-19T20:54:37.113Z"
+          "msg": "comment: n=45 p50=127ms p95=175ms max=367ms",
+          "at": "2026-07-19T20:59:37.021Z"
         },
         {
           "suite": "100-user-sim",
-          "msg": "search: n=45 p50=76ms p95=112ms max=135ms",
-          "at": "2026-07-19T20:54:37.113Z"
+          "msg": "search: n=45 p50=76ms p95=95ms max=125ms",
+          "at": "2026-07-19T20:59:37.021Z"
         },
         {
           "suite": "100-user-sim",
-          "msg": "move: n=45 p50=150ms p95=180ms max=201ms",
-          "at": "2026-07-19T20:54:37.113Z"
+          "msg": "move: n=45 p50=145ms p95=194ms max=381ms",
+          "at": "2026-07-19T20:59:37.021Z"
         },
         {
           "suite": "100-user-sim",
-          "msg": "Full journey: success=45/100 (45.0%) wall=106794ms p50=1722ms p95=1843ms concurrency=3",
-          "at": "2026-07-19T20:54:37.113Z"
+          "msg": "Full journey: success=45/100 (45.0%) wall=106800ms p50=1661ms p95=1886ms concurrency=3",
+          "at": "2026-07-19T20:59:37.021Z"
         },
         {
           "suite": "100-user-sim",
           "msg": "Failure sample errors: register 429",
-          "at": "2026-07-19T20:54:37.113Z"
+          "at": "2026-07-19T20:59:37.021Z"
         },
         {
           "suite": "100-user-sim",
-          "msg": "Stress spike: 6/30 concurrent full journeys succeeded",
-          "at": "2026-07-19T20:54:41.784Z"
+          "msg": "Stress spike: 11/30 concurrent full journeys succeeded",
+          "at": "2026-07-19T20:59:41.571Z"
         }
       ]
     },
